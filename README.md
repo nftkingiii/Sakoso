@@ -34,6 +34,12 @@ Example discovery:
 curl "http://localhost:8080/v1/agents?category=health-factor-monitoring&endpointVerified=true"
 ```
 
+Production API: `https://api-production-b9a7.up.railway.app`
+
+```bash
+curl "https://api-production-b9a7.up.railway.app/healthz"
+```
+
 ## Local development
 
 Requirements: Node.js 24+ and pnpm 11.11.0.
@@ -51,6 +57,8 @@ An 8004scan API key is optional for development and should only be placed in `.e
 pnpm verify
 pnpm audit --prod
 ```
+
+Production deploys use Railway's Railpack builder, a revision-bearing health check, bounded restart policy, and graceful shutdown. The [rollback procedure](docs/ROLLBACK.md) records the release triggers and recovery path.
 
 ## Evidence boundaries
 
