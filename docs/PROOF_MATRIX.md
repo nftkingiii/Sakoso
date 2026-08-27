@@ -10,4 +10,4 @@
 | Altana session lifecycle | Local owner-signed grant, selector-scoped execute, `finally` revocation, and before/after KeyStore verification | Typechecked proof runner; address-only dry run | Partial; funded onchain transactions not yet produced |
 | ERC-8183 hiring | Planned buyer-side job lifecycle | None yet | Missing |
 | Agent advantage | Planned paired task measurements | None yet | Missing |
-| Public deployment | Railway configuration, revision-bearing health endpoint, and rollback procedure | Production deployment `91f1ffe0-f789-457f-8335-df68c0357278`; `/healthz` served exact revision `f6d4f37`; full public route smoke | Verified; one transient upstream timeout retained in milestone evidence |
+| Public deployment | Railway configuration, revision-bearing health endpoint, and rollback procedure | Deployment `f1789c5a-fdfb-456a-be78-d68e1d9ed66d`; `/healthz` serves code revision `88a6aa6`; full Altana and existing-route smoke | Verified; superseded bad-marker release and earlier transient upstream timeout retained in milestone evidence |
