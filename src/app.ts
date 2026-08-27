@@ -1,9 +1,16 @@
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import Fastify from "fastify";
+import { getAddress, type Hex } from "viem";
 import { z } from "zod";
 import { AgentCategorySchema, categorySearchTerms } from "./domain/categories.js";
+import { PrepareAltanaSessionSchema, prepareAltanaSession } from "./domain/altana-session.js";
 import { PrepareMandateSchema, prepareMandate } from "./domain/mandate.js";
+import {
+  altanaAuthorityLinks,
+  altanaPublicConfig,
+  type AltanaAuthoritySource,
+} from "./integrations/altana.js";
 import type { AgentListRequest, AgentSource, ScanAgent } from "./integrations/scan8004.js";
 
 const AgentQuerySchema = z.object({
@@ -19,8 +26,20 @@ const AgentQuerySchema = z.object({
   sort: z.enum(["quality", "recent", "feedback"]).default("quality"),
 });
 
+const AltanaAuthorityQuerySchema = z.object({
+  wallet: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]{40}$/)
+    .transform((value) => getAddress(value.toLowerCase())),
+  publicKey: z
+    .string()
+    .regex(/^0x04[a-fA-F0-9]{128}$/)
+    .transform((value) => value as Hex),
+});
+
 export interface BuildAppOptions {
   source: AgentSource;
+  authoritySource: AltanaAuthoritySource;
   revision: string;
   now?: () => Date;
 }
@@ -85,6 +104,79 @@ export async function buildApp(options: BuildAppOptions) {
   app.get("/v1/categories", async () => ({
     items: AgentCategorySchema.options.map((id) => ({ id, searchIntent: categorySearchTerms[id] })),
   }));
+
+  app.get("/v1/altana/config", async () => altanaPublicConfig());
+
+  app.get(
+    "/v1/altana/authority",
+    { config: { rateLimit: { max: 30, timeWindow: "1 minute" } } },
+    async (request, reply) => {
+      const parsed = AltanaAuthorityQuerySchema.safeParse(request.query);
+      if (!parsed.success) {
+        return reply.status(422).send({
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Expected a wallet address and a 65-byte SEC1 public key.",
+          },
+        });
+      }
+
+      try {
+        const observation = await options.authoritySource.readAuthority({
+          walletAddress: parsed.data.wallet,
+          publicKey: parsed.data.publicKey,
+        });
+        return {
+          walletAddress: observation.walletAddress,
+          keyId: observation.keyId,
+          authorized: observation.authorized,
+          status: observation.authorized ? "active" : "revoked-or-unregistered",
+          observedAt: (options.now ?? (() => new Date()))().toISOString(),
+          observedBlock: observation.blockNumber.toString(),
+          source: {
+            kind: "onchain",
+            chainId: 97,
+            contract: altanaPublicConfig().contracts.keyStore,
+          },
+          explorer: altanaAuthorityLinks(observation.walletAddress, observation.keyId),
+        };
+      } catch (error) {
+        request.log.warn({ error }, "Altana authority read unavailable");
+        return reply.status(502).send({
+          error: {
+            code: "ALTANA_READ_UNAVAILABLE",
+            message: "Altana authority state is temporarily unavailable.",
+          },
+        });
+      }
+    },
+  );
+
+  app.post(
+    "/v1/altana/sessions/prepare",
+    { config: { rateLimit: { max: 30, timeWindow: "1 minute" } } },
+    async (request, reply) => {
+      const parsed = PrepareAltanaSessionSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.status(422).send({
+          error: { code: "VALIDATION_ERROR", message: "Invalid Altana session constraints." },
+        });
+      }
+
+      try {
+        return reply
+          .status(201)
+          .send(prepareAltanaSession(parsed.data, (options.now ?? (() => new Date()))()));
+      } catch (error) {
+        return reply.status(422).send({
+          error: {
+            code: "INVALID_EXPIRY",
+            message: error instanceof Error ? error.message : "Invalid Altana session expiry.",
+          },
+        });
+      }
+    },
+  );
 
   app.get(
     "/v1/coverage",

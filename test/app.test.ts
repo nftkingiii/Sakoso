@@ -1,8 +1,20 @@
 import { describe, expect, it, vi } from "vitest";
 import { buildApp } from "../src/app.js";
+import type { AltanaAuthoritySource } from "../src/integrations/altana.js";
 import type { AgentSource } from "../src/integrations/scan8004.js";
 
 const observedAt = new Date("2026-08-27T18:00:00.000Z");
+
+function authoritySource(authorized = false): AltanaAuthoritySource {
+  return {
+    readAuthority: vi.fn().mockResolvedValue({
+      walletAddress: "0x1111111111111111111111111111111111111111",
+      keyId: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      authorized,
+      blockNumber: 72_000_001n,
+    }),
+  };
+}
 
 function sourceWithOneAgent(): AgentSource {
   return {
@@ -35,7 +47,11 @@ function sourceWithOneAgent(): AgentSource {
 
 describe("Sakoso API", () => {
   it("reports the served revision", async () => {
-    const app = await buildApp({ source: sourceWithOneAgent(), revision: "abc123" });
+    const app = await buildApp({
+      source: sourceWithOneAgent(),
+      authoritySource: authoritySource(),
+      revision: "abc123",
+    });
     const response = await app.inject({ method: "GET", url: "/healthz" });
 
     expect(response.statusCode).toBe(200);
@@ -45,7 +61,12 @@ describe("Sakoso API", () => {
 
   it("returns normalized live-source evidence and applies the category intent", async () => {
     const source = sourceWithOneAgent();
-    const app = await buildApp({ source, revision: "test", now: () => observedAt });
+    const app = await buildApp({
+      source,
+      authoritySource: authoritySource(),
+      revision: "test",
+      now: () => observedAt,
+    });
     const response = await app.inject({
       method: "GET",
       url: "/v1/agents?category=rebalancing",
@@ -63,7 +84,11 @@ describe("Sakoso API", () => {
   });
 
   it("rejects unsupported categories at the boundary", async () => {
-    const app = await buildApp({ source: sourceWithOneAgent(), revision: "test" });
+    const app = await buildApp({
+      source: sourceWithOneAgent(),
+      authoritySource: authoritySource(),
+      revision: "test",
+    });
     const response = await app.inject({ method: "GET", url: "/v1/agents?category=sniping" });
 
     expect(response.statusCode).toBe(422);
@@ -73,7 +98,12 @@ describe("Sakoso API", () => {
 
   it("measures live-source coverage across every required category", async () => {
     const source = sourceWithOneAgent();
-    const app = await buildApp({ source, revision: "test", now: () => observedAt });
+    const app = await buildApp({
+      source,
+      authoritySource: authoritySource(),
+      revision: "test",
+      now: () => observedAt,
+    });
     const response = await app.inject({ method: "GET", url: "/v1/coverage" });
 
     expect(response.statusCode).toBe(200);
@@ -91,7 +121,12 @@ describe("Sakoso API", () => {
   });
 
   it("prepares a deterministic, unsigned BSC mandate", async () => {
-    const app = await buildApp({ source: sourceWithOneAgent(), revision: "test", now: () => observedAt });
+    const app = await buildApp({
+      source: sourceWithOneAgent(),
+      authoritySource: authoritySource(),
+      revision: "test",
+      now: () => observedAt,
+    });
     const body = {
       principal: "0x1111111111111111111111111111111111111111",
       agentId: "56:0x8004a169fb4a3325136eb29fa0ceb6d2e539a432:42",
@@ -124,7 +159,12 @@ describe("Sakoso API", () => {
   });
 
   it("rejects mandates that expire outside the bounded window", async () => {
-    const app = await buildApp({ source: sourceWithOneAgent(), revision: "test", now: () => observedAt });
+    const app = await buildApp({
+      source: sourceWithOneAgent(),
+      authoritySource: authoritySource(),
+      revision: "test",
+      now: () => observedAt,
+    });
     const response = await app.inject({
       method: "POST",
       url: "/v1/mandates/prepare",
@@ -147,6 +187,126 @@ describe("Sakoso API", () => {
 
     expect(response.statusCode).toBe(422);
     expect(response.json()).toMatchObject({ error: { code: "INVALID_EXPIRY" } });
+    await app.close();
+  });
+
+  it("prepares selector-scoped Altana permissions with a mandatory spend cap", async () => {
+    const app = await buildApp({
+      source: sourceWithOneAgent(),
+      authoritySource: authoritySource(),
+      revision: "test",
+      now: () => observedAt,
+    });
+    const body = {
+      walletAddress: "0x1111111111111111111111111111111111111111",
+      allowedCalls: [
+        {
+          target: "0x2222222222222222222222222222222222222222",
+          signature: "deposit()",
+        },
+      ],
+      spend: { limitAtomicAmount: "100000000000000", period: "day" },
+      expiresAt: "2026-08-27T19:00:00.000Z",
+    };
+
+    const first = await app.inject({
+      method: "POST",
+      url: "/v1/altana/sessions/prepare",
+      payload: body,
+    });
+    const second = await app.inject({
+      method: "POST",
+      url: "/v1/altana/sessions/prepare",
+      payload: body,
+    });
+
+    expect(first.statusCode).toBe(201);
+    expect(first.json()).toMatchObject({
+      status: "draft",
+      requiresWalletConfirmation: true,
+      onchain: false,
+      payload: {
+        chainId: 97,
+        registerInKeyStore: true,
+        permissions: {
+          calls: [{ to: expect.any(String), signature: "deposit()" }],
+          spend: [{ limit: "100000000000000", period: "day" }],
+        },
+      },
+      digest: expect.stringMatching(/^0x[0-9a-f]{64}$/),
+    });
+    expect(first.json().digest).toBe(second.json().digest);
+    await app.close();
+  });
+
+  it("rejects Altana sessions without both a call allowlist and spend cap", async () => {
+    const app = await buildApp({
+      source: sourceWithOneAgent(),
+      authoritySource: authoritySource(),
+      revision: "test",
+      now: () => observedAt,
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/altana/sessions/prepare",
+      payload: {
+        walletAddress: "0x1111111111111111111111111111111111111111",
+        allowedCalls: [],
+        expiresAt: "2026-08-27T19:00:00.000Z",
+      },
+    });
+
+    expect(response.statusCode).toBe(422);
+    expect(response.json()).toMatchObject({ error: { code: "VALIDATION_ERROR" } });
+    await app.close();
+  });
+
+  it("returns block-pinned Altana KeyStore authority evidence", async () => {
+    const authority = authoritySource(true);
+    const app = await buildApp({
+      source: sourceWithOneAgent(),
+      authoritySource: authority,
+      revision: "test",
+      now: () => observedAt,
+    });
+    const publicKey = `0x04${"11".repeat(64)}`;
+    const response = await app.inject({
+      method: "GET",
+      url: `/v1/altana/authority?wallet=0x1111111111111111111111111111111111111111&publicKey=${publicKey}`,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      authorized: true,
+      status: "active",
+      observedAt: observedAt.toISOString(),
+      observedBlock: "72000001",
+      source: { kind: "onchain", chainId: 97 },
+      explorer: {
+        account: expect.stringContaining("testnet.altana.network/account/"),
+        key: expect.stringContaining("testnet.altana.network/key/"),
+      },
+    });
+    expect(authority.readAuthority).toHaveBeenCalledWith({
+      walletAddress: "0x1111111111111111111111111111111111111111",
+      publicKey,
+    });
+    await app.close();
+  });
+
+  it("does not accept a private key at the Altana authority boundary", async () => {
+    const app = await buildApp({
+      source: sourceWithOneAgent(),
+      authoritySource: authoritySource(),
+      revision: "test",
+    });
+    const response = await app.inject({
+      method: "GET",
+      url: `/v1/altana/authority?wallet=0x1111111111111111111111111111111111111111&publicKey=0x${"11".repeat(32)}`,
+    });
+
+    expect(response.statusCode).toBe(422);
+    expect(response.json()).toMatchObject({ error: { code: "VALIDATION_ERROR" } });
     await app.close();
   });
 });

@@ -1,5 +1,6 @@
 import { buildApp } from "./app.js";
 import { readConfig } from "./config.js";
+import { OnchainAltanaAuthoritySource } from "./integrations/altana.js";
 import { Scan8004AgentSource } from "./integrations/scan8004.js";
 
 const config = readConfig();
@@ -8,7 +9,8 @@ const source = new Scan8004AgentSource({
   timeoutMs: config.UPSTREAM_TIMEOUT_MS,
   cacheTtlMs: config.CACHE_TTL_MS,
 });
-const app = await buildApp({ source, revision: config.REVISION });
+const authoritySource = new OnchainAltanaAuthoritySource();
+const app = await buildApp({ source, authoritySource, revision: config.REVISION });
 
 const shutdown = async (signal: string) => {
   app.log.info({ signal }, "shutdown requested");

@@ -6,6 +6,7 @@ coverage/
 !.env.example
 *.key
 *.pem
+.private/
 
 # Local hack operations; intentionally excluded from the judge-facing repository.
 PROJECT_STATE.md

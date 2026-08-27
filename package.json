@@ -16,12 +16,15 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "altana:proof": "tsx scripts/altana-proof.ts",
     "verify": "pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
+    "@altananetwork/sdk": "0.8.0",
     "@fastify/helmet": "13.1.1",
     "@fastify/rate-limit": "11.2.0",
     "fastify": "5.12.1",
+    "viem": "2.56.0",
     "zod": "4.4.3"
   },
   "devDependencies": {

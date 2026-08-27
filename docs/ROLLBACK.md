@@ -15,7 +15,7 @@ Sakoso's backend is stateless in this milestone: it has no database, migrations,
 1. Open the Railway `api` service's deployment history.
 2. Select the last verified deployment and choose **Rollback**.
 3. Confirm `/healthz` returns the prior expected revision.
-4. Exercise `/v1/categories`, `/v1/coverage`, `/v1/agents`, and `/v1/mandates/prepare`.
+4. Exercise `/v1/categories`, `/v1/coverage`, `/v1/agents`, `/v1/mandates/prepare`, `/v1/altana/config`, `/v1/altana/sessions/prepare`, and a negative `/v1/altana/authority` read.
 5. Inspect deploy and HTTP logs for new errors.
 
 Railway restores the selected deployment's image and variables. Image retention depends on the account plan, so this path is time-limited.
