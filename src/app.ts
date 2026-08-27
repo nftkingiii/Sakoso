@@ -86,6 +86,45 @@ export async function buildApp(options: BuildAppOptions) {
     items: AgentCategorySchema.options.map((id) => ({ id, searchIntent: categorySearchTerms[id] })),
   }));
 
+  app.get(
+    "/v1/coverage",
+    { config: { rateLimit: { max: 30, timeWindow: "1 minute" } } },
+    async (request, reply) => {
+      try {
+        const observedAt = (options.now ?? (() => new Date()))().toISOString();
+        const results = await Promise.all(
+          AgentCategorySchema.options.map(async (category) => {
+            const result = await options.source.listAgents({
+              limit: 1,
+              offset: 0,
+              search: categorySearchTerms[category],
+              sortBy: "quality",
+            });
+            return {
+              category,
+              liveCandidateCount: result.total,
+              leadingCandidate: result.items[0] ? publicAgent(result.items[0]) : null,
+            };
+          }),
+        );
+
+        return {
+          items: results,
+          complete: results.every((result) => result.liveCandidateCount > 0),
+          source: { provider: "8004scan", chainId: 56, observedAt },
+        };
+      } catch (error) {
+        request.log.warn({ error }, "category coverage upstream unavailable");
+        return reply.status(502).send({
+          error: {
+            code: "AGENT_SOURCE_UNAVAILABLE",
+            message: "Live BSC agent coverage is temporarily unavailable.",
+          },
+        });
+      }
+    },
+  );
+
   app.get("/v1/agents", async (request, reply) => {
     const parsed = AgentQuerySchema.safeParse(request.query);
     if (!parsed.success) {
@@ -134,25 +173,31 @@ export async function buildApp(options: BuildAppOptions) {
     }
   });
 
-  app.post("/v1/mandates/prepare", { config: { rateLimit: { max: 30, timeWindow: "1 minute" } } }, async (request, reply) => {
-    const parsed = PrepareMandateSchema.safeParse(request.body);
-    if (!parsed.success) {
-      return reply.status(422).send({
-        error: { code: "VALIDATION_ERROR", message: "Invalid mandate constraints." },
-      });
-    }
+  app.post(
+    "/v1/mandates/prepare",
+    { config: { rateLimit: { max: 30, timeWindow: "1 minute" } } },
+    async (request, reply) => {
+      const parsed = PrepareMandateSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.status(422).send({
+          error: { code: "VALIDATION_ERROR", message: "Invalid mandate constraints." },
+        });
+      }
 
-    try {
-      return reply.status(201).send(prepareMandate(parsed.data, (options.now ?? (() => new Date()))()));
-    } catch (error) {
-      return reply.status(422).send({
-        error: {
-          code: "INVALID_EXPIRY",
-          message: error instanceof Error ? error.message : "Invalid mandate expiry.",
-        },
-      });
-    }
-  });
+      try {
+        return reply
+          .status(201)
+          .send(prepareMandate(parsed.data, (options.now ?? (() => new Date()))()));
+      } catch (error) {
+        return reply.status(422).send({
+          error: {
+            code: "INVALID_EXPIRY",
+            message: error instanceof Error ? error.message : "Invalid mandate expiry.",
+          },
+        });
+      }
+    },
+  );
 
   return app;
 }

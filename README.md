@@ -24,6 +24,7 @@ The mandate endpoint prepares an unsigned commitment. It does **not** create an 
 | --- | --- |
 | `GET /healthz` | Liveness and served revision |
 | `GET /v1/categories` | The four official marketplace categories |
+| `GET /v1/coverage` | Live coverage and leading candidate for every required category |
 | `GET /v1/agents` | Live BSC agent discovery and comparison evidence |
 | `POST /v1/mandates/prepare` | Validate and hash a bounded mandate for later wallet confirmation |
 

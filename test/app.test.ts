@@ -71,6 +71,25 @@ describe("Sakoso API", () => {
     await app.close();
   });
 
+  it("measures live-source coverage across every required category", async () => {
+    const source = sourceWithOneAgent();
+    const app = await buildApp({ source, revision: "test", now: () => observedAt });
+    const response = await app.inject({ method: "GET", url: "/v1/coverage" });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      complete: true,
+      items: [
+        { category: "rebalancing", liveCandidateCount: 1 },
+        { category: "grid-trading", liveCandidateCount: 1 },
+        { category: "yield-optimisation", liveCandidateCount: 1 },
+        { category: "health-factor-monitoring", liveCandidateCount: 1 },
+      ],
+    });
+    expect(source.listAgents).toHaveBeenCalledTimes(4);
+    await app.close();
+  });
+
   it("prepares a deterministic, unsigned BSC mandate", async () => {
     const app = await buildApp({ source: sourceWithOneAgent(), revision: "test", now: () => observedAt });
     const body = {
