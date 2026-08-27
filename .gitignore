@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Local hack operations; intentionally excluded from the judge-facing repository.
+PROJECT_STATE.md
+HACK_EVENT_GATE.json
+demo-day.ics
