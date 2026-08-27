@@ -9,4 +9,4 @@
 | Altana | Planned session creation, onchain limits, and revocation | None yet | Missing |
 | ERC-8183 hiring | Planned buyer-side job lifecycle | None yet | Missing |
 | Agent advantage | Planned paired task measurements | None yet | Missing |
-| Public deployment | Railway configuration, revision-bearing health endpoint, and rollback procedure | `/healthz` served `local-smoke` locally; production URL reserved | Pending live revision and route verification |
+| Public deployment | Railway configuration, revision-bearing health endpoint, and rollback procedure | Production deployment `91f1ffe0-f789-457f-8335-df68c0357278`; `/healthz` served exact revision `f6d4f37`; full public route smoke | Verified; one transient upstream timeout retained in milestone evidence |
