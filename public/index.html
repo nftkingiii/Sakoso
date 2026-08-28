@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="/assets/styles.css" />
     <script type="module" src="/assets/app.js"></script>
   </head>
-  <body>
+  <body class="is-landing">
     <a class="skip-link" href="#main-content">Skip to content</a>
     <div class="grain" aria-hidden="true"></div>
 
@@ -45,17 +45,6 @@
           data-view="agents"
         >
           Live agents
-        </button>
-        <button
-          class="view-tab"
-          id="tab-control"
-          type="button"
-          role="tab"
-          aria-selected="false"
-          aria-controls="view-control"
-          data-view="control"
-        >
-          Set limits
         </button>
         <button
           class="view-tab"
@@ -103,9 +92,6 @@
             </p>
             <div class="hero-actions">
               <button class="button button-light" type="button" data-go-view="agents">Explore live agents</button>
-              <button class="button button-quiet" type="button" data-go-view="control">
-                Define authority
-              </button>
             </div>
           </div>
 
@@ -229,12 +215,12 @@
         class="view-panel workflow-view"
         id="view-control"
         role="tabpanel"
-        aria-labelledby="tab-control"
+        aria-labelledby="control-title"
         data-panel="control"
         hidden
       >
         <header class="workflow-header">
-          <h1>Draw the boundary before the agent moves.</h1>
+          <h1 id="control-title">Draw the boundary before the agent moves.</h1>
           <p>
             Prepare selector-level Altana permissions. Sakoso validates the limits and returns an
             unsigned digest; your wallet remains the only signer.
@@ -463,6 +449,40 @@
         </div>
       </section>
     </main>
+
+    <dialog class="agent-detail" id="agent-detail" aria-labelledby="agent-detail-title">
+      <div class="agent-detail-shell">
+        <button class="detail-close" id="agent-detail-close" type="button" aria-label="Close agent details">×</button>
+        <header class="detail-heading">
+          <div class="detail-meta">
+            <span id="agent-detail-index"></span>
+            <span class="evidence-state" id="agent-detail-evidence"></span>
+          </div>
+          <p class="detail-kicker">Live BSC identity</p>
+          <h2 id="agent-detail-title"></h2>
+          <p class="detail-description" id="agent-detail-description"></p>
+        </header>
+
+        <dl class="detail-metrics" id="agent-detail-metrics"></dl>
+
+        <div class="detail-body">
+          <section>
+            <p class="detail-section-label">Registry record</p>
+            <dl class="detail-registry" id="agent-detail-registry"></dl>
+          </section>
+          <section>
+            <p class="detail-section-label">Declared protocols</p>
+            <div class="protocol-list detail-protocols" id="agent-detail-protocols"></div>
+            <p class="detail-note">Limits are prepared as an unsigned permission draft. Your wallet remains the only signer.</p>
+          </section>
+        </div>
+
+        <footer class="detail-footer">
+          <span>Choose this agent, then define its contract, function, spend and time boundary.</span>
+          <button class="button button-light" id="agent-detail-limits" type="button">Set limits</button>
+        </footer>
+      </div>
+    </dialog>
 
     <footer class="site-footer">
       <div>

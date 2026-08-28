@@ -5,6 +5,7 @@ const agentList = document.querySelector("#agent-list");
 const marketSource = document.querySelector("#market-source");
 const sessionForm = document.querySelector("#session-form");
 const verifyForm = document.querySelector("#verify-form");
+const agentDetail = document.querySelector("#agent-detail");
 
 const state = {
   category: "",
@@ -13,6 +14,8 @@ const state = {
   selectedAgent: null,
   agentRequest: null,
   latestDigest: null,
+  inspectedAgent: null,
+  detailTrigger: null,
 };
 const views = ["home", "agents", "control", "verify"];
 
@@ -83,9 +86,12 @@ function formatMetric(value, suffix = "") {
 }
 
 function activateView(view, { focus = false } = {}) {
-  const targetTab = document.querySelector(`[data-view="${view}"]`);
   const targetPanel = document.querySelector(`[data-panel="${view}"]`);
-  if (!targetTab || !targetPanel) return;
+  if (!targetPanel) return;
+  const navView = view === "control" ? "agents" : view;
+  const targetTab = document.querySelector(`[data-view="${navView}"]`);
+
+  document.body.classList.toggle("is-landing", view === "home");
 
   document.querySelectorAll("[data-view]").forEach((tab) => {
     const active = tab === targetTab;
@@ -99,7 +105,7 @@ function activateView(view, { focus = false } = {}) {
 
   history.replaceState(null, "", `#${view}`);
   window.scrollTo({ top: 0, behavior: "smooth" });
-  if (focus) targetTab.focus();
+  if (focus) targetTab?.focus();
 }
 
 document.querySelectorAll("[data-view]").forEach((tab) => {
@@ -192,6 +198,59 @@ function selectAgent(agent) {
   activateView("control");
 }
 
+function registryRow(label, value) {
+  const row = element("div");
+  row.append(element("dt", "", label), element("dd", "", value));
+  return row;
+}
+
+function openAgentDetail(agent, index, trigger) {
+  state.inspectedAgent = agent;
+  state.detailTrigger = trigger;
+
+  document.querySelector("#agent-detail-index").textContent = String(index + 1).padStart(2, "0");
+  const evidence = document.querySelector("#agent-detail-evidence");
+  evidence.textContent = agent.evidence.endpointVerified ? "Endpoint verified" : "Registry evidence";
+  evidence.classList.toggle("is-verified", Boolean(agent.evidence.endpointVerified));
+  document.querySelector("#agent-detail-title").textContent = agent.name || `Agent ${agent.tokenId}`;
+  document.querySelector("#agent-detail-description").textContent =
+    agent.description || "No publisher description is available for this live identity.";
+
+  document.querySelector("#agent-detail-metrics").replaceChildren(
+    metric("Quality", formatMetric(agent.evidence.score)),
+    metric("Feedback", formatMetric(agent.evidence.feedbackCount)),
+    metric("Average", formatMetric(agent.evidence.averageFeedback, "%")),
+    metric("Stars", formatMetric(agent.evidence.stars)),
+  );
+  document.querySelector("#agent-detail-registry").replaceChildren(
+    registryRow("Agent ID", truncate(agent.id, 15, 10)),
+    registryRow("Owner", truncate(agent.owner, 10, 8)),
+    registryRow("Registry", truncate(agent.registry, 10, 8)),
+    registryRow("Chain", agent.evidence.bscMainnet ? "BNB Smart Chain · 56" : String(agent.chainId ?? "Unknown")),
+    registryRow("Updated", agent.evidence.observedUpdatedAt ? new Date(agent.evidence.observedUpdatedAt).toLocaleString() : "Unavailable"),
+    registryRow("Payments", agent.payments.x402 ? "x402 declared" : "No x402 claim"),
+  );
+  const protocols = renderProtocols(agent.protocols, agent.payments.x402);
+  document.querySelector("#agent-detail-protocols").replaceChildren(...protocols.childNodes);
+
+  agentDetail.showModal();
+}
+
+document.querySelector("#agent-detail-close").addEventListener("click", () => agentDetail.close());
+agentDetail.addEventListener("click", (event) => {
+  if (event.target === agentDetail) agentDetail.close();
+});
+agentDetail.addEventListener("close", () => {
+  state.detailTrigger?.focus();
+  state.detailTrigger = null;
+});
+document.querySelector("#agent-detail-limits").addEventListener("click", () => {
+  if (!state.inspectedAgent) return;
+  const agent = state.inspectedAgent;
+  agentDetail.close();
+  selectAgent(agent);
+});
+
 document.querySelector("#clear-selected-agent").addEventListener("click", () => {
   state.selectedAgent = null;
   document.querySelector("#selected-agent").hidden = true;
@@ -200,6 +259,10 @@ document.querySelector("#clear-selected-agent").addEventListener("click", () => 
 
 function agentCard(agent, index) {
   const card = element("article", "agent-card");
+  card.tabIndex = 0;
+  card.setAttribute("role", "button");
+  card.setAttribute("aria-haspopup", "dialog");
+  card.setAttribute("aria-label", `View details for ${agent.name || `Agent ${agent.tokenId}`}`);
   const head = element("div", "agent-card-head");
   const evidence = element(
     "span",
@@ -222,10 +285,15 @@ function agentCard(agent, index) {
   );
 
   const footer = element("div", "agent-footer");
-  const action = element("button", "agent-action", "Set limits");
-  action.type = "button";
-  action.addEventListener("click", () => selectAgent(agent));
-  footer.append(renderProtocols(agent.protocols, agent.payments.x402), action);
+  footer.append(renderProtocols(agent.protocols, agent.payments.x402), element("span", "agent-open-label", "View agent"));
+
+  const open = () => openAgentDetail(agent, index, card);
+  card.addEventListener("click", open);
+  card.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    open();
+  });
 
   card.append(head, title, description, metrics, footer);
   return card;
