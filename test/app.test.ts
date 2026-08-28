@@ -64,6 +64,8 @@ describe("Sakoso API", () => {
     expect(response.body).toContain('<body class="is-landing">');
     expect(response.body).toContain('data-view="agents"');
     expect(response.body).toContain("Agent marketplace");
+    expect(response.body).toContain("Choose an agent to work with.");
+    expect(response.body).not.toContain("Live market coverage");
     expect(response.body).toContain('data-panel="agents"');
     expect(response.body).not.toContain('data-view="control"');
     expect(response.body).toContain('data-panel="control"');

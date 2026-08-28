@@ -1,6 +1,5 @@
 const apiStatus = document.querySelector("#api-status");
 const apiDot = document.querySelector("#api-dot");
-const coverageGrid = document.querySelector("#coverage-grid");
 const agentList = document.querySelector("#agent-list");
 const marketSource = document.querySelector("#market-source");
 const sessionForm = document.querySelector("#session-form");
@@ -64,16 +63,6 @@ async function requestJson(url, options = {}) {
   } finally {
     window.clearTimeout(timeout);
   }
-}
-
-function labelForCategory(value) {
-  const labels = {
-    rebalancing: "Rebalancing",
-    "grid-trading": "Grid trading",
-    "yield-optimisation": "Yield optimisation",
-    "health-factor-monitoring": "Health factor",
-  };
-  return labels[value] ?? value.replaceAll("-", " ");
 }
 
 function truncate(value, start = 7, end = 5) {
@@ -142,40 +131,6 @@ async function loadHealth() {
     apiStatus.textContent = "API unavailable";
   }
 }
-
-function coverageCard(item) {
-  const card = element("article", "coverage-card");
-  card.append(
-    element("strong", "coverage-number", item.liveCandidateCount),
-    element("span", "coverage-label", labelForCategory(item.category)),
-    element(
-      "span",
-      "coverage-meta",
-      item.leadingCandidate ? `Leading: ${item.leadingCandidate.name}` : "No indexed candidate",
-    ),
-  );
-  return card;
-}
-
-async function loadCoverage() {
-  coverageGrid.setAttribute("aria-busy", "true");
-  coverageGrid.replaceChildren(...Array.from({ length: 4 }, () => element("div", "coverage-skeleton")));
-  try {
-    const result = await requestJson("/v1/coverage");
-    coverageGrid.replaceChildren(...result.items.map(coverageCard));
-  } catch (error) {
-    replaceWithMessage(
-      coverageGrid,
-      "coverage-error",
-      "Coverage evidence is temporarily unavailable.",
-      error instanceof Error ? error.message : "The live source did not respond.",
-    );
-  } finally {
-    coverageGrid.setAttribute("aria-busy", "false");
-  }
-}
-
-document.querySelector("#refresh-coverage").addEventListener("click", loadCoverage);
 
 function metric(label, value) {
   const wrapper = element("div");
@@ -624,5 +579,4 @@ setDefaultExpiry();
 createAuthorityField();
 activateView(views.includes(location.hash.slice(1)) ? location.hash.slice(1) : "home");
 loadHealth();
-loadCoverage();
 loadAgents();
