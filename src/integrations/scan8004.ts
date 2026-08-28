@@ -88,8 +88,6 @@ export class Scan8004AgentSource implements AgentSource {
 
     const url = new URL("https://api.8004scan.io/api/v1/agents");
     url.searchParams.set("chain_id", "56");
-    url.searchParams.set("is_testnet", "false");
-    url.searchParams.set("is_active", "true");
     url.searchParams.set("limit", String(request.limit));
     url.searchParams.set("offset", String(request.offset));
     url.searchParams.set("sort_by", sortFields[request.sortBy]);
@@ -113,10 +111,14 @@ export class Scan8004AgentSource implements AgentSource {
     if (!response.ok) throw new Error(`8004scan returned ${response.status}`);
 
     const parsed = AgentListSchema.parse(await response.json());
+    const filtered: AgentListResult = {
+      ...parsed,
+      items: parsed.items.filter((agent) => agent.chain_id === 56 && !agent.is_testnet),
+    };
     this.cache.set(cacheKey, {
       expiresAt: Date.now() + this.options.cacheTtlMs,
-      value: parsed,
+      value: filtered,
     });
-    return parsed;
+    return filtered;
   }
 }
