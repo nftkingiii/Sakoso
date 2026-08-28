@@ -40,7 +40,7 @@ function setButtonPending(button, pending, pendingLabel, readyLabel) {
 
 async function requestJson(url, options = {}) {
   const controller = options.controller ?? new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 9_000);
+  const timeout = window.setTimeout(() => controller.abort(), 15_000);
 
   try {
     const response = await fetch(url, {

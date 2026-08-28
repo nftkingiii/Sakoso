@@ -26,7 +26,7 @@ describe("8004scan integration", () => {
     expect(calledUrl.origin).toBe("https://api.8004scan.io");
     expect(calledUrl.searchParams.get("chain_id")).toBe("56");
     expect(calledUrl.searchParams.get("is_testnet")).toBe("false");
-    expect(calledUrl.searchParams.get("is_registered")).toBe("true");
+    expect(calledUrl.searchParams.get("is_registered")).toBeNull();
     expect(calledUrl.searchParams.get("is_active")).toBe("true");
     expect(calledUrl.searchParams.get("search")).toBe("yield optimisation");
   });

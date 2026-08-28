@@ -80,7 +80,7 @@ export async function buildApp(options: BuildAppOptions) {
       redact: ["req.headers.authorization", "req.headers.x-api-key"],
     },
     bodyLimit: 32 * 1_024,
-    requestTimeout: 10_000,
+    requestTimeout: 15_000,
   });
 
   await app.register(helmet, {

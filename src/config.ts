@@ -6,7 +6,7 @@ const ConfigSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   REVISION: z.string().trim().min(1).max(80).default("dev"),
   SCAN8004_API_KEY: z.string().trim().min(1).optional(),
-  UPSTREAM_TIMEOUT_MS: z.coerce.number().int().min(500).max(15_000).default(5_000),
+  UPSTREAM_TIMEOUT_MS: z.coerce.number().int().min(500).max(15_000).default(12_000),
   CACHE_TTL_MS: z.coerce.number().int().min(1_000).max(300_000).default(15_000),
 });
 

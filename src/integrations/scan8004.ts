@@ -89,7 +89,6 @@ export class Scan8004AgentSource implements AgentSource {
     const url = new URL("https://api.8004scan.io/api/v1/agents");
     url.searchParams.set("chain_id", "56");
     url.searchParams.set("is_testnet", "false");
-    url.searchParams.set("is_registered", "true");
     url.searchParams.set("is_active", "true");
     url.searchParams.set("limit", String(request.limit));
     url.searchParams.set("offset", String(request.offset));
