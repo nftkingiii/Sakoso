@@ -77,6 +77,11 @@ describe("Sakoso API", () => {
     expect(response.body).toContain("BNB Testnet · 97");
     expect(response.body).toContain('id="agent-detail"');
     expect(response.body).toContain('id="agent-detail-limits"');
+    expect(response.body).toContain('id="agent-scroll-sentinel"');
+    expect(response.body).toContain('id="agent-scroll-status"');
+    expect(response.body).not.toContain('id="agent-load-more"');
+    expect(response.body).toContain('class="advanced-settings"');
+    expect(response.body).toContain("Prepare wallet approval");
     expect(response.body).not.toContain("data-scroll-agents");
     expect(response.body).not.toContain("↘");
     expect(response.body).toContain('/assets/app.js');
@@ -107,6 +112,7 @@ describe("Sakoso API", () => {
     expect(Number(globe.headers["content-length"])).toBeGreaterThan(50_000);
     expect(script.statusCode).toBe(200);
     expect(script.body).toContain("IntersectionObserver");
+    expect(script.body).toContain("setupAgentInfiniteScroll");
     expect(script.body).toContain("copy-registry-value");
     await app.close();
   });

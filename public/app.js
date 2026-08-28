@@ -5,6 +5,8 @@ const marketSource = document.querySelector("#market-source");
 const sessionForm = document.querySelector("#session-form");
 const verifyForm = document.querySelector("#verify-form");
 const agentDetail = document.querySelector("#agent-detail");
+const agentScrollSentinel = document.querySelector("#agent-scroll-sentinel");
+const agentScrollStatus = document.querySelector("#agent-scroll-status");
 
 const state = {
   category: "",
@@ -16,6 +18,10 @@ const state = {
   inspectedAgent: null,
   detailTrigger: null,
   agentOffset: 0,
+  agentTotal: 0,
+  hasMoreAgents: true,
+  isLoadingAgents: false,
+  agentQueryVersion: 0,
   agentNames: new Set(),
   agentCards: [],
 };
@@ -289,34 +295,83 @@ function agentCard(agent, index) {
   return card;
 }
 
+function categoryLabel() {
+  const active = document.querySelector("[data-category].is-active");
+  if (!active?.dataset.category) return "agents";
+  return active.textContent.trim().toLocaleLowerCase();
+}
+
+function updateAgentScrollStatus() {
+  if (state.isLoadingAgents && state.agentCards.length) {
+    agentScrollStatus.textContent = `Loading more ${categoryLabel()}…`;
+    return;
+  }
+  if (!state.hasMoreAgents && state.agentCards.length) {
+    agentScrollStatus.textContent = `All ${state.agentCards.length} available ${categoryLabel()} shown.`;
+    return;
+  }
+  agentScrollStatus.textContent = "";
+}
+
+function revealAgentCards(cards) {
+  window.requestAnimationFrame(() => cards.forEach((card) => card.classList.add("is-visible")));
+}
+
 async function loadAgents({ append = false } = {}) {
-  state.agentRequest?.abort();
+  if (append && (state.isLoadingAgents || !state.hasMoreAgents)) return;
+  if (!append) {
+    state.agentRequest?.abort();
+    state.agentQueryVersion += 1;
+  }
+  const queryVersion = state.agentQueryVersion;
   const controller = new AbortController();
   state.agentRequest = controller;
+  state.isLoadingAgents = true;
   agentList.setAttribute("aria-busy", "true");
   if (!append) {
     state.agentOffset = 0;
+    state.agentTotal = 0;
+    state.hasMoreAgents = true;
     state.agentNames = new Set();
     state.agentCards = [];
     agentList.replaceChildren(...Array.from({ length: 3 }, () => element("article", "agent-skeleton")));
   }
-
-  const params = new URLSearchParams({ limit: "12", offset: String(state.agentOffset), sort: state.sort });
-  if (state.category) params.set("category", state.category);
-  if (state.search) params.set("q", state.search);
+  updateAgentScrollStatus();
 
   try {
-    const result = await requestJson(`/v1/agents?${params}`, { controller });
-    if (controller.signal.aborted) return;
-    const uniqueItems = [...new Map(result.items.map((item) => [item.id, item])).values()];
-    const newItems = uniqueItems.filter((item) => {
-      const key = item.name.trim().toLocaleLowerCase();
-      if (state.agentNames.has(key)) return false;
-      state.agentNames.add(key);
-      return true;
-    });
+    const newItems = [];
+    let observedAt = null;
+    let pagesScanned = 0;
+
+    while (state.hasMoreAgents && newItems.length === 0 && pagesScanned < 4) {
+      const params = new URLSearchParams({ limit: "12", offset: String(state.agentOffset), sort: state.sort });
+      if (state.category) params.set("category", state.category);
+      if (state.search) params.set("q", state.search);
+
+      const result = await requestJson(`/v1/agents?${params}`, { controller });
+      if (controller.signal.aborted || queryVersion !== state.agentQueryVersion) return;
+      const rawItems = Array.isArray(result.items) ? result.items : [];
+      const uniqueItems = [...new Map(rawItems.map((item) => [item.id, item])).values()];
+      uniqueItems.forEach((item) => {
+        const normalizedName = item.name?.trim().toLocaleLowerCase();
+        const key = normalizedName || item.id;
+        if (state.agentNames.has(key)) return;
+        state.agentNames.add(key);
+        newItems.push(item);
+      });
+      state.agentOffset += rawItems.length;
+      state.agentTotal = result.page.total;
+      state.hasMoreAgents = rawItems.length > 0 && state.agentOffset < result.page.total;
+      observedAt = result.source.observedAt;
+      pagesScanned += 1;
+    }
+
+    const startIndex = state.agentCards.length;
     state.agentCards.push(...newItems);
-    marketSource.textContent = `Showing ${state.agentCards.length} unique agents from ${state.agentOffset + uniqueItems.length} registry records · ${result.page.total.toLocaleString()} indexed BSC mainnet identities · observed ${new Date(result.source.observedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    const observedCopy = observedAt
+      ? ` · observed ${new Date(observedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+      : "";
+    marketSource.textContent = `Showing ${state.agentCards.length} unique agents from ${state.agentOffset.toLocaleString()} checked registry records · ${state.agentTotal.toLocaleString()} matching BSC mainnet identities${observedCopy}`;
     if (!state.agentCards.length) {
       replaceWithMessage(
         agentList,
@@ -324,15 +379,13 @@ async function loadAgents({ append = false } = {}) {
         "No live agents match these filters.",
         "Try a broader category or remove the search term.",
       );
+      state.hasMoreAgents = false;
       return;
     }
-    agentList.replaceChildren(...state.agentCards.map(agentCard));
-    window.requestAnimationFrame(() => {
-      agentList.querySelectorAll(".agent-card").forEach((card) => card.classList.add("is-visible"));
-    });
-    const loadMore = document.querySelector("#agent-load-more");
-    state.agentOffset += uniqueItems.length;
-    loadMore.hidden = state.agentOffset >= result.page.total || uniqueItems.length === 0;
+    const cards = newItems.map((agent, index) => agentCard(agent, startIndex + index));
+    if (append) agentList.append(...cards);
+    else agentList.replaceChildren(...cards);
+    revealAgentCards(cards);
   } catch (error) {
     if (controller.signal.aborted) return;
     marketSource.textContent = "Live discovery source unavailable.";
@@ -342,13 +395,38 @@ async function loadAgents({ append = false } = {}) {
       "Agent discovery could not be completed.",
       error instanceof Error ? error.message : "The live source did not respond.",
     );
-    document.querySelector("#agent-load-more").hidden = true;
+    state.hasMoreAgents = false;
   } finally {
-    if (!controller.signal.aborted) agentList.setAttribute("aria-busy", "false");
+    if (!controller.signal.aborted && queryVersion === state.agentQueryVersion) {
+      state.isLoadingAgents = false;
+      agentList.setAttribute("aria-busy", "false");
+      updateAgentScrollStatus();
+    }
   }
 }
 
-document.querySelector("#agent-load-more").addEventListener("click", () => loadAgents({ append: true }));
+function setupAgentInfiniteScroll() {
+  if (!("IntersectionObserver" in window)) {
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (agentScrollSentinel.getBoundingClientRect().top < window.innerHeight + 500) {
+          loadAgents({ append: true });
+        }
+      },
+      { passive: true },
+    );
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) loadAgents({ append: true });
+    },
+    { rootMargin: "500px 0px" },
+  );
+  observer.observe(agentScrollSentinel);
+}
 
 document.querySelectorAll("[data-category]").forEach((button) => {
   button.addEventListener("click", () => {
@@ -494,7 +572,7 @@ sessionForm.addEventListener("submit", async (event) => {
     expiresAt: expiry.toISOString(),
   };
 
-  setButtonPending(submit, true, "Preparing…", "Prepare permission digest");
+  setButtonPending(submit, true, "Preparing…", "Prepare wallet approval");
   try {
     const result = await requestJson("/v1/altana/sessions/prepare", {
       method: "POST",
@@ -510,7 +588,7 @@ sessionForm.addEventListener("submit", async (event) => {
     errorBox.textContent = error instanceof Error ? error.message : "The session draft could not be prepared.";
     errorBox.hidden = false;
   } finally {
-    setButtonPending(submit, false, "Preparing…", "Prepare permission digest");
+    setButtonPending(submit, false, "Preparing…", "Prepare wallet approval");
   }
 });
 
@@ -684,6 +762,7 @@ function createAuthorityField() {
 setDefaultExpiry();
 createAuthorityField();
 setupLandingMotion();
+setupAgentInfiniteScroll();
 activateView(views.includes(location.hash.slice(1)) ? location.hash.slice(1) : "home");
 loadHealth();
 loadAgents();

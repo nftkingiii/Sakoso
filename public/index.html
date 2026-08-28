@@ -259,9 +259,8 @@
             <article class="agent-skeleton"></article>
             <article class="agent-skeleton"></article>
           </div>
-          <button class="button button-quiet agent-load-more" id="agent-load-more" type="button" hidden>
-            Load more agents
-          </button>
+          <div class="agent-scroll-sentinel" id="agent-scroll-sentinel" aria-hidden="true"></div>
+          <p class="agent-scroll-status" id="agent-scroll-status" aria-live="polite"></p>
         </section>
       </section>
 
@@ -274,10 +273,10 @@
         hidden
       >
         <header class="workflow-header">
-          <h1 id="control-title">Draw the boundary before the agent moves.</h1>
+          <h1 id="control-title">Hire the agent. Keep the boundary.</h1>
           <p>
-            Prepare selector-level Altana permissions. Discovery is sourced from BSC mainnet;
-            authority drafts target BNB Testnet (chain 97) and remain unsigned until your wallet confirms.
+            Add the wallet, contract, function and spend cap. Sakoso applies safe time defaults,
+            then prepares an unsigned BNB Testnet approval for your wallet.
           </p>
           <button class="button button-quiet workflow-back" type="button" data-go-view="agents">← Back to agent marketplace</button>
         </header>
@@ -287,7 +286,7 @@
             <div class="form-heading">
               <div>
                 <span class="step-index">01</span>
-                <h2>Session constraints</h2>
+                <h2>Essential limits</h2>
               </div>
               <span class="network-chip"><span></span> Authority · BNB Testnet · 97</span>
             </div>
@@ -345,8 +344,7 @@
               </label>
             </div>
 
-            <div class="field-pair">
-              <label class="field" for="session-spend">
+            <label class="field field-wide" for="session-spend">
                 <span>Native spend cap</span>
                 <div class="input-suffix">
                   <input
@@ -362,34 +360,34 @@
                   />
                   <span>wei</span>
                 </div>
-              </label>
-              <label class="field" for="session-period">
-                <span>Reset period</span>
-                <select id="session-period" name="period" required>
-                  <option value="hour">Hourly</option>
-                  <option value="day" selected>Daily</option>
-                  <option value="week">Weekly</option>
-                  <option value="month">Monthly</option>
-                </select>
-              </label>
-            </div>
-
-            <label class="field field-wide" for="session-expiry">
-              <span>Session expiry</span>
-              <input id="session-expiry" name="expiresAt" type="datetime-local" required />
-              <small>Must be between 10 minutes and 7 days from now.</small>
             </label>
 
-            <div class="constraint-summary" aria-label="Mandatory safety constraints">
-              <span><i aria-hidden="true">✓</i> Contract allowlist</span>
-              <span><i aria-hidden="true">✓</i> Function selector</span>
-              <span><i aria-hidden="true">✓</i> Spend ceiling</span>
-              <span><i aria-hidden="true">✓</i> Auto-expiry</span>
-            </div>
+            <details class="advanced-settings">
+              <summary>
+                <span>Time defaults</span>
+                <small>Daily reset · 1 hour</small>
+              </summary>
+              <div class="advanced-settings-grid">
+                <label class="field" for="session-period">
+                  <span>Reset period</span>
+                  <select id="session-period" name="period" required>
+                    <option value="hour">Hourly</option>
+                    <option value="day" selected>Daily</option>
+                    <option value="week">Weekly</option>
+                    <option value="month">Monthly</option>
+                  </select>
+                </label>
+                <label class="field" for="session-expiry">
+                  <span>Session expiry</span>
+                  <input id="session-expiry" name="expiresAt" type="datetime-local" required />
+                  <small>10 minutes to 7 days.</small>
+                </label>
+              </div>
+            </details>
 
             <div class="form-error" id="session-error" role="alert" hidden></div>
             <button class="button button-light submit-button" id="session-submit" type="submit">
-              Prepare permission digest
+              Prepare wallet approval
               <span aria-hidden="true">→</span>
             </button>
           </form>
@@ -534,8 +532,8 @@
         </div>
 
         <footer class="detail-footer">
-          <span>Choose this agent, then define its contract, function, spend and time boundary.</span>
-          <button class="button button-light" id="agent-detail-limits" type="button">Set limits</button>
+          <span>Review the evidence, then grant only the authority this agent needs.</span>
+          <button class="button button-light" id="agent-detail-limits" type="button">Hire this agent</button>
         </footer>
       </div>
     </dialog>
