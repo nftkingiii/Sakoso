@@ -6,10 +6,11 @@ Sakoso is a bounded marketplace for financial agents on BNB Chain. It is being b
 
 `Sakoso` is the ASCII product spelling of the Yorùbá verb `ṣàkóso`: to control, manage, or administer.
 
-## Backend milestones
+## Product milestones
 
-This repository currently contains two proof-first backend slices:
+This repository contains a proof-first vertical slice:
 
+- an original responsive marketplace interface with live discovery, authority drafting, and onchain verification as separate top-level workflows;
 - live ERC-8004 discovery through 8004scan, pinned to registered and active BSC mainnet identities;
 - the four required marketplace categories as first-class API values;
 - normalized identity, protocol, payment, score, feedback, and freshness evidence;
@@ -19,12 +20,13 @@ This repository currently contains two proof-first backend slices:
 - a local grant, execute, verify, revoke, verify runner that never sends either signer key to the API or writes generated session material to disk;
 - security headers, rate limits, request-size limits, upstream timeouts, schema validation, and secret redaction.
 
-The two prepare endpoints create unsigned commitments. They do **not** create authority. The local Altana runner is the only signing path in this milestone, and its first funded onchain run is still pending.
+The interface does not simulate wallet state. Its two prepare flows create unsigned commitments; they do **not** create authority. The local Altana runner is the only signing path in this milestone, and its first funded onchain run is still pending.
 
 ## API
 
 | Route | Purpose |
 | --- | --- |
+| `GET /` | Responsive Sakoso marketplace and authority interface |
 | `GET /healthz` | Liveness and served revision |
 | `GET /v1/categories` | The four official marketplace categories |
 | `GET /v1/coverage` | Live coverage and leading candidate for every required category |
@@ -40,7 +42,7 @@ Example discovery:
 curl "http://localhost:8080/v1/agents?category=health-factor-monitoring&endpointVerified=true"
 ```
 
-Production API: `https://api-production-b9a7.up.railway.app`
+Production product and API: `https://api-production-b9a7.up.railway.app`
 
 ```bash
 curl "https://api-production-b9a7.up.railway.app/healthz"

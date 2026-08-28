@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Sakoso bounded orbit</title>
+  <desc id="desc">A control rail crosses a permission ring and ends at a verification node.</desc>
+  <g fill="none" stroke="#f4f3ed" stroke-linecap="round">
+    <circle cx="27" cy="32" r="15.5" stroke-width="3"/>
+    <path d="M6 32h46" stroke-width="3"/>
+    <path d="M27 16.5a15.5 15.5 0 0 1 13.9 8.6" stroke="#868983" stroke-width="3" stroke-dasharray="1 5"/>
+  </g>
+  <circle cx="57" cy="32" r="3" fill="#f4f3ed"/>
+  <rect x="9" y="27" width="3" height="3" fill="#f4f3ed"/>
+  <rect x="13" y="35" width="2" height="2" fill="#777a75"/>
+</svg>

@@ -1,5 +1,8 @@
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
+import fastifyStatic from "@fastify/static";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import Fastify from "fastify";
 import { getAddress, type Hex } from "viem";
 import { z } from "zod";
@@ -80,11 +83,24 @@ export async function buildApp(options: BuildAppOptions) {
     requestTimeout: 10_000,
   });
 
-  await app.register(helmet, { global: true });
+  await app.register(helmet, {
+    global: true,
+    contentSecurityPolicy: {
+      directives: {
+        styleSrc: ["'self'"],
+      },
+    },
+  });
   await app.register(rateLimit, {
     global: true,
     max: 120,
     timeWindow: "1 minute",
+  });
+  await app.register(fastifyStatic, {
+    root: resolve(dirname(fileURLToPath(import.meta.url)), "..", "public"),
+    prefix: "/assets/",
+    maxAge: 0,
+    immutable: false,
   });
 
   app.setErrorHandler((error, request, reply) => {
@@ -100,6 +116,12 @@ export async function buildApp(options: BuildAppOptions) {
     service: "sakoso-api",
     revision: options.revision,
   }));
+
+  app.get("/", async (_request, reply) => {
+    return reply
+      .header("Cache-Control", "no-store")
+      .sendFile("index.html", { cacheControl: false });
+  });
 
   app.get("/v1/categories", async () => ({
     items: AgentCategorySchema.options.map((id) => ({ id, searchIntent: categorySearchTerms[id] })),

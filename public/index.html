@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Discover financial agents on BNB Chain, define their exact authority, and verify it onchain."
+    />
+    <meta name="theme-color" content="#070807" />
+    <title>Sakoso — Hire agents. Keep control.</title>
+    <link rel="icon" href="/assets/mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/styles.css" />
+    <script type="module" src="/assets/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a class="brand" href="#discover" aria-label="Sakoso home">
+        <span class="brand-mark"><img src="/assets/mark.svg" alt="" /></span>
+        <span class="brand-name">Sakoso</span>
+      </a>
+
+      <nav class="view-tabs" aria-label="Primary" role="tablist">
+        <button
+          class="view-tab is-active"
+          id="tab-discover"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          aria-controls="view-discover"
+          data-view="discover"
+        >
+          Discover
+        </button>
+        <button
+          class="view-tab"
+          id="tab-control"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="view-control"
+          data-view="control"
+        >
+          Set limits
+        </button>
+        <button
+          class="view-tab"
+          id="tab-verify"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="view-verify"
+          data-view="verify"
+        >
+          Verify
+        </button>
+      </nav>
+
+      <div class="api-indicator" aria-live="polite">
+        <span class="api-dot" id="api-dot"></span>
+        <span id="api-status">Checking live API</span>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section
+        class="view-panel"
+        id="view-discover"
+        role="tabpanel"
+        aria-labelledby="tab-discover"
+        data-panel="discover"
+      >
+        <section class="hero-shell">
+          <div class="hero-copy">
+            <h1>Give agents room to work. <em>Not room to wander.</em></h1>
+            <p class="hero-lede">
+              Discover live financial agents on BNB Chain, define exactly what they can call and
+              spend, then verify their authority onchain.
+            </p>
+            <div class="hero-actions">
+              <button class="button button-light" type="button" data-scroll-agents>
+                Explore live agents
+                <span aria-hidden="true">↘</span>
+              </button>
+              <button class="button button-quiet" type="button" data-go-view="control">
+                Define authority
+              </button>
+            </div>
+            <dl class="hero-facts">
+              <div>
+                <dt>Discovery</dt>
+                <dd>ERC-8004 · BSC</dd>
+              </div>
+              <div>
+                <dt>Authority</dt>
+                <dd>Altana · Testnet</dd>
+              </div>
+              <div>
+                <dt>Signing</dt>
+                <dd>User controlled</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="hero-visual" aria-label="A point cloud representing a bounded agent authority field">
+            <canvas id="authority-field" aria-hidden="true"></canvas>
+            <div class="field-caption">
+              <span>Permission field</span>
+              <span class="field-coordinate">97 / KEYSTORE</span>
+            </div>
+            <div class="field-legend" aria-hidden="true">
+              <span class="legend-node"></span>
+              <span>Every call stays inside the field.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="coverage-shell" aria-labelledby="coverage-heading">
+          <div class="section-intro compact-intro">
+            <div>
+              <h2 id="coverage-heading">Live market coverage</h2>
+              <p>Equal visibility across the four official marketplace categories.</p>
+            </div>
+            <button class="text-action" id="refresh-coverage" type="button">Refresh evidence</button>
+          </div>
+          <div class="coverage-grid" id="coverage-grid" aria-live="polite" aria-busy="true">
+            <div class="coverage-skeleton"></div>
+            <div class="coverage-skeleton"></div>
+            <div class="coverage-skeleton"></div>
+            <div class="coverage-skeleton"></div>
+          </div>
+        </section>
+
+        <section class="market-shell" id="agent-market" aria-labelledby="market-heading">
+          <div class="section-intro market-intro">
+            <div>
+              <h2 id="market-heading">Find the right agent</h2>
+              <p id="market-source">Loading live ERC-8004 identities from 8004scan.</p>
+            </div>
+            <div class="market-controls">
+              <label class="search-control" for="agent-search">
+                <span class="visually-hidden">Search agents</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="11" cy="11" r="6"></circle>
+                  <path d="m16 16 4 4"></path>
+                </svg>
+                <input id="agent-search" type="search" maxlength="100" placeholder="Search capabilities" />
+              </label>
+              <label class="sort-control" for="agent-sort">
+                <span>Sort</span>
+                <select id="agent-sort">
+                  <option value="quality">Quality</option>
+                  <option value="feedback">Feedback</option>
+                  <option value="recent">Recent</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="category-tabs" id="category-tabs" aria-label="Agent category filters">
+            <button class="category-tab is-active" type="button" data-category="">All agents</button>
+            <button class="category-tab" type="button" data-category="rebalancing">Rebalancing</button>
+            <button class="category-tab" type="button" data-category="grid-trading">Grid trading</button>
+            <button class="category-tab" type="button" data-category="yield-optimisation">Yield</button>
+            <button class="category-tab" type="button" data-category="health-factor-monitoring">Health factor</button>
+          </div>
+
+          <div class="agent-list" id="agent-list" aria-live="polite" aria-busy="true">
+            <article class="agent-skeleton"></article>
+            <article class="agent-skeleton"></article>
+            <article class="agent-skeleton"></article>
+          </div>
+        </section>
+      </section>
+
+      <section
+        class="view-panel workflow-view"
+        id="view-control"
+        role="tabpanel"
+        aria-labelledby="tab-control"
+        data-panel="control"
+        hidden
+      >
+        <header class="workflow-header">
+          <h1>Draw the boundary before the agent moves.</h1>
+          <p>
+            Prepare selector-level Altana permissions. Sakoso validates the limits and returns an
+            unsigned digest; your wallet remains the only signer.
+          </p>
+        </header>
+
+        <div class="workflow-grid">
+          <form class="authority-form" id="session-form" novalidate>
+            <div class="form-heading">
+              <div>
+                <span class="step-index">01</span>
+                <h2>Session constraints</h2>
+              </div>
+              <span class="network-chip"><span></span> BNB Testnet · 97</span>
+            </div>
+
+            <div class="selected-agent" id="selected-agent" hidden>
+              <span>Marketplace context</span>
+              <strong id="selected-agent-name"></strong>
+              <button type="button" id="clear-selected-agent">Clear</button>
+            </div>
+
+            <label class="field field-wide" for="session-wallet">
+              <span>Smart-wallet address</span>
+              <input
+                id="session-wallet"
+                name="walletAddress"
+                type="text"
+                inputmode="text"
+                autocomplete="off"
+                spellcheck="false"
+                maxlength="42"
+                pattern="0x[a-fA-F0-9]{40}"
+                placeholder="0x…"
+                required
+              />
+              <small>The EIP-7702 wallet that will grant this session.</small>
+            </label>
+
+            <div class="field-pair">
+              <label class="field" for="session-target">
+                <span>Allowed contract</span>
+                <input
+                  id="session-target"
+                  name="target"
+                  type="text"
+                  autocomplete="off"
+                  spellcheck="false"
+                  maxlength="42"
+                  pattern="0x[a-fA-F0-9]{40}"
+                  placeholder="0x…"
+                  required
+                />
+              </label>
+              <label class="field" for="session-signature">
+                <span>Allowed function</span>
+                <input
+                  id="session-signature"
+                  name="signature"
+                  type="text"
+                  autocomplete="off"
+                  spellcheck="false"
+                  maxlength="200"
+                  placeholder="deposit()"
+                  required
+                />
+              </label>
+            </div>
+
+            <div class="field-pair">
+              <label class="field" for="session-spend">
+                <span>Native spend cap</span>
+                <div class="input-suffix">
+                  <input
+                    id="session-spend"
+                    name="limitAtomicAmount"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    maxlength="78"
+                    pattern="[0-9]+"
+                    placeholder="100000000000000"
+                    required
+                  />
+                  <span>wei</span>
+                </div>
+              </label>
+              <label class="field" for="session-period">
+                <span>Reset period</span>
+                <select id="session-period" name="period" required>
+                  <option value="hour">Hourly</option>
+                  <option value="day" selected>Daily</option>
+                  <option value="week">Weekly</option>
+                  <option value="month">Monthly</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="field field-wide" for="session-expiry">
+              <span>Session expiry</span>
+              <input id="session-expiry" name="expiresAt" type="datetime-local" required />
+              <small>Must be between 10 minutes and 7 days from now.</small>
+            </label>
+
+            <div class="constraint-summary" aria-label="Mandatory safety constraints">
+              <span><i aria-hidden="true">✓</i> Contract allowlist</span>
+              <span><i aria-hidden="true">✓</i> Function selector</span>
+              <span><i aria-hidden="true">✓</i> Spend ceiling</span>
+              <span><i aria-hidden="true">✓</i> Auto-expiry</span>
+            </div>
+
+            <div class="form-error" id="session-error" role="alert" hidden></div>
+            <button class="button button-light submit-button" id="session-submit" type="submit">
+              Prepare permission digest
+              <span aria-hidden="true">→</span>
+            </button>
+          </form>
+
+          <aside class="authority-output" aria-live="polite">
+            <div class="output-art" aria-hidden="true">
+              <div class="orbit orbit-outer"></div>
+              <div class="orbit orbit-inner"></div>
+              <div class="output-rail"></div>
+              <div class="output-node"></div>
+            </div>
+            <div id="session-empty">
+              <span class="step-index">02</span>
+              <h2>Your boundary will appear here.</h2>
+              <p>
+                The response is a deterministic draft, not onchain authority. Signing and KeyStore
+                registration happen separately under your control.
+              </p>
+            </div>
+            <div class="session-result" id="session-result" hidden>
+              <div class="result-status"><span></span> Ready for wallet confirmation</div>
+              <h2>Permission digest prepared.</h2>
+              <dl>
+                <div><dt>Digest</dt><dd id="result-digest"></dd></div>
+                <div><dt>Chain</dt><dd id="result-chain"></dd></div>
+                <div><dt>Expiry</dt><dd id="result-expiry"></dd></div>
+                <div><dt>Onchain</dt><dd>No — unsigned draft</dd></div>
+              </dl>
+              <button class="copy-action" id="copy-digest" type="button">Copy digest</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section
+        class="view-panel workflow-view"
+        id="view-verify"
+        role="tabpanel"
+        aria-labelledby="tab-verify"
+        data-panel="verify"
+        hidden
+      >
+        <header class="workflow-header verify-header">
+          <h1>Authority should be public. <em>Secrets should not.</em></h1>
+          <p>
+            Enter only a wallet address and 65-byte session public key. Sakoso derives the key ID
+            and reads Altana’s deployed KeyStore at a pinned block.
+          </p>
+        </header>
+
+        <div class="verify-shell">
+          <form class="verify-form" id="verify-form" novalidate>
+            <label class="field field-wide" for="verify-wallet">
+              <span>Smart-wallet address</span>
+              <input
+                id="verify-wallet"
+                name="wallet"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                maxlength="42"
+                pattern="0x[a-fA-F0-9]{40}"
+                placeholder="0x…"
+                required
+              />
+            </label>
+            <label class="field field-wide" for="verify-key">
+              <span>Session public key</span>
+              <textarea
+                id="verify-key"
+                name="publicKey"
+                autocomplete="off"
+                spellcheck="false"
+                maxlength="132"
+                placeholder="0x04…"
+                required
+              ></textarea>
+              <small>Private keys are rejected. Nothing entered here is stored.</small>
+            </label>
+            <div class="form-error" id="verify-error" role="alert" hidden></div>
+            <button class="button button-light submit-button" id="verify-submit" type="submit">
+              Read KeyStore authority
+              <span aria-hidden="true">→</span>
+            </button>
+          </form>
+
+          <aside class="verify-output" id="verify-output" aria-live="polite">
+            <div class="scan-field" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span><span></span>
+              <i></i>
+            </div>
+            <div id="verify-empty">
+              <p class="verify-kicker">Direct RPC read</p>
+              <h2>No authority checked yet.</h2>
+              <p>Results distinguish active authority from keys that are revoked or unregistered.</p>
+            </div>
+            <div class="verify-result" id="verify-result" hidden>
+              <div class="authority-state" id="authority-state"></div>
+              <h2 id="authority-title"></h2>
+              <p id="authority-copy"></p>
+              <dl>
+                <div><dt>Observed block</dt><dd id="authority-block"></dd></div>
+                <div><dt>Key ID</dt><dd id="authority-key"></dd></div>
+                <div><dt>Wallet</dt><dd id="authority-wallet"></dd></div>
+              </dl>
+              <div class="explorer-actions">
+                <a id="authority-account-link" target="_blank" rel="noreferrer">Account ↗</a>
+                <a id="authority-key-link" target="_blank" rel="noreferrer">Key record ↗</a>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <img src="/assets/mark.svg" alt="" />
+        <span>Sakoso</span>
+      </div>
+      <p>Hire agents. Keep control.</p>
+      <nav aria-label="Project links">
+        <a href="https://github.com/nftkingiii/Sakoso" target="_blank" rel="noreferrer">GitHub ↗</a>
+        <a href="https://testnet.altana.network" target="_blank" rel="noreferrer">Altana explorer ↗</a>
+      </nav>
+    </footer>
+  </body>
+</html>

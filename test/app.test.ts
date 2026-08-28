@@ -46,6 +46,45 @@ function sourceWithOneAgent(): AgentSource {
 }
 
 describe("Sakoso API", () => {
+  it("serves the product frontend with no-store HTML", async () => {
+    const app = await buildApp({
+      source: sourceWithOneAgent(),
+      authoritySource: authoritySource(),
+      revision: "test",
+    });
+    const response = await app.inject({ method: "GET", url: "/" });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-type"]).toContain("text/html");
+    expect(response.headers["cache-control"]).toBe("no-store");
+    expect(response.headers["content-security-policy"]).toContain("style-src 'self'");
+    expect(response.headers["content-security-policy"]).not.toContain("'unsafe-inline'");
+    expect(response.body).toContain("Give agents room to work.");
+    expect(response.body).toContain("Not room to wander.");
+    expect(response.body).toContain('/assets/app.js');
+    await app.close();
+  });
+
+  it("serves the self-hosted visual system and product mark", async () => {
+    const app = await buildApp({
+      source: sourceWithOneAgent(),
+      authoritySource: authoritySource(),
+      revision: "test",
+    });
+    const [styles, mark] = await Promise.all([
+      app.inject({ method: "GET", url: "/assets/styles.css" }),
+      app.inject({ method: "GET", url: "/assets/mark.svg" }),
+    ]);
+
+    expect(styles.statusCode).toBe(200);
+    expect(styles.headers["content-type"]).toContain("text/css");
+    expect(styles.body).toContain("prefers-reduced-motion");
+    expect(mark.statusCode).toBe(200);
+    expect(mark.headers["content-type"]).toContain("image/svg+xml");
+    expect(mark.body).toContain("Sakoso bounded orbit");
+    await app.close();
+  });
+
   it("reports the served revision", async () => {
     const app = await buildApp({
       source: sourceWithOneAgent(),
