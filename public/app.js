@@ -417,23 +417,31 @@ function setupLandingMotion() {
   revealTargets.forEach((target) => revealObserver.observe(target));
   sections.forEach((section) => revealObserver.observe(section));
 
-  const sectionObserver = new IntersectionObserver(
-    (entries) => {
-      const active = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
-      if (!active) return;
-      const section = active.target.dataset.scrollSection;
-      document.querySelectorAll("[data-section-link]").forEach((link) => {
-        const selected = link.dataset.sectionLink === section;
-        link.classList.toggle("is-active", selected);
-        if (selected) link.setAttribute("aria-current", "true");
-        else link.removeAttribute("aria-current");
-      });
-    },
-    { threshold: [0.2, 0.45, 0.7], rootMargin: "-35% 0px -45%" },
-  );
-  sections.forEach((section) => sectionObserver.observe(section));
+  let railFrame = 0;
+  const updateSectionRail = () => {
+    railFrame = 0;
+    if (!document.body.classList.contains("is-landing")) return;
+    const viewportTarget = window.innerHeight * 0.48;
+    const active = sections.reduce((closest, section) => {
+      const bounds = section.getBoundingClientRect();
+      const distance = Math.abs(bounds.top + bounds.height * 0.5 - viewportTarget);
+      return !closest || distance < closest.distance ? { section, distance } : closest;
+    }, null)?.section;
+    const activeNumber = active?.dataset.scrollSection;
+    document.querySelectorAll("[data-section-link]").forEach((link) => {
+      const selected = link.dataset.sectionLink === activeNumber;
+      link.classList.toggle("is-active", selected);
+      if (selected) link.setAttribute("aria-current", "true");
+      else link.removeAttribute("aria-current");
+    });
+  };
+  const scheduleSectionRail = () => {
+    if (railFrame) return;
+    railFrame = window.requestAnimationFrame(updateSectionRail);
+  };
+  window.addEventListener("scroll", scheduleSectionRail, { passive: true });
+  window.addEventListener("resize", scheduleSectionRail, { passive: true });
+  updateSectionRail();
 }
 
 function setDefaultExpiry() {
