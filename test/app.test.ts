@@ -63,9 +63,11 @@ describe("Sakoso API", () => {
     expect(response.body).toContain("Never room to wander.");
     expect(response.body).toContain('<body class="is-landing">');
     expect(response.body).toContain('data-view="agents"');
+    expect(response.body).toContain("Agent marketplace");
     expect(response.body).toContain('data-panel="agents"');
     expect(response.body).not.toContain('data-view="control"');
     expect(response.body).toContain('data-panel="control"');
+    expect(response.body).toContain("BNB Testnet · 97");
     expect(response.body).toContain('id="agent-detail"');
     expect(response.body).toContain('id="agent-detail-limits"');
     expect(response.body).not.toContain("data-scroll-agents");

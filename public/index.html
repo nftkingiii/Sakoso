@@ -44,7 +44,7 @@
           aria-controls="view-agents"
           data-view="agents"
         >
-          Live agents
+          Agent marketplace
         </button>
         <button
           class="view-tab"
@@ -222,9 +222,10 @@
         <header class="workflow-header">
           <h1 id="control-title">Draw the boundary before the agent moves.</h1>
           <p>
-            Prepare selector-level Altana permissions. Sakoso validates the limits and returns an
-            unsigned digest; your wallet remains the only signer.
+            Prepare selector-level Altana permissions. Discovery is sourced from BSC mainnet;
+            authority drafts target BNB Testnet (chain 97) and remain unsigned until your wallet confirms.
           </p>
+          <button class="button button-quiet workflow-back" type="button" data-go-view="agents">← Back to agent marketplace</button>
         </header>
 
         <div class="workflow-grid">
@@ -234,7 +235,7 @@
                 <span class="step-index">01</span>
                 <h2>Session constraints</h2>
               </div>
-              <span class="network-chip"><span></span> BNB Testnet · 97</span>
+              <span class="network-chip"><span></span> Authority · BNB Testnet · 97</span>
             </div>
 
             <div class="selected-agent" id="selected-agent" hidden>

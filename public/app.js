@@ -313,8 +313,9 @@ async function loadAgents() {
   try {
     const result = await requestJson(`/v1/agents?${params}`, { controller });
     if (controller.signal.aborted) return;
-    marketSource.textContent = `${result.page.total.toLocaleString()} live BSC identities · observed ${new Date(result.source.observedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-    if (!result.items.length) {
+    const uniqueItems = [...new Map(result.items.map((item) => [item.id, item])).values()];
+    marketSource.textContent = `Showing ${uniqueItems.length} of ${result.page.total.toLocaleString()} indexed BSC mainnet identities · observed ${new Date(result.source.observedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    if (!uniqueItems.length) {
       replaceWithMessage(
         agentList,
         "agent-empty",
@@ -323,7 +324,7 @@ async function loadAgents() {
       );
       return;
     }
-    agentList.replaceChildren(...result.items.map(agentCard));
+    agentList.replaceChildren(...uniqueItems.map(agentCard));
   } catch (error) {
     if (controller.signal.aborted) return;
     marketSource.textContent = "Live discovery source unavailable.";
