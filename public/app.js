@@ -16,6 +16,9 @@ const state = {
   latestDigest: null,
   inspectedAgent: null,
   detailTrigger: null,
+  agentOffset: 0,
+  agentNames: new Set(),
+  agentCards: [],
 };
 const views = ["home", "agents", "control", "verify"];
 
@@ -299,14 +302,19 @@ function agentCard(agent, index) {
   return card;
 }
 
-async function loadAgents() {
+async function loadAgents({ append = false } = {}) {
   state.agentRequest?.abort();
   const controller = new AbortController();
   state.agentRequest = controller;
   agentList.setAttribute("aria-busy", "true");
-  agentList.replaceChildren(...Array.from({ length: 3 }, () => element("article", "agent-skeleton")));
+  if (!append) {
+    state.agentOffset = 0;
+    state.agentNames = new Set();
+    state.agentCards = [];
+    agentList.replaceChildren(...Array.from({ length: 3 }, () => element("article", "agent-skeleton")));
+  }
 
-  const params = new URLSearchParams({ limit: "12", sort: state.sort });
+  const params = new URLSearchParams({ limit: "12", offset: String(state.agentOffset), sort: state.sort });
   if (state.category) params.set("category", state.category);
   if (state.search) params.set("q", state.search);
 
@@ -314,8 +322,15 @@ async function loadAgents() {
     const result = await requestJson(`/v1/agents?${params}`, { controller });
     if (controller.signal.aborted) return;
     const uniqueItems = [...new Map(result.items.map((item) => [item.id, item])).values()];
-    marketSource.textContent = `Showing ${uniqueItems.length} of ${result.page.total.toLocaleString()} indexed BSC mainnet identities · observed ${new Date(result.source.observedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-    if (!uniqueItems.length) {
+    const newItems = uniqueItems.filter((item) => {
+      const key = item.name.trim().toLocaleLowerCase();
+      if (state.agentNames.has(key)) return false;
+      state.agentNames.add(key);
+      return true;
+    });
+    state.agentCards.push(...newItems);
+    marketSource.textContent = `Showing ${state.agentCards.length} unique agents from ${state.agentOffset + uniqueItems.length} registry records · ${result.page.total.toLocaleString()} indexed BSC mainnet identities · observed ${new Date(result.source.observedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    if (!state.agentCards.length) {
       replaceWithMessage(
         agentList,
         "agent-empty",
@@ -324,7 +339,10 @@ async function loadAgents() {
       );
       return;
     }
-    agentList.replaceChildren(...uniqueItems.map(agentCard));
+    agentList.replaceChildren(...state.agentCards.map(agentCard));
+    const loadMore = document.querySelector("#agent-load-more");
+    state.agentOffset += uniqueItems.length;
+    loadMore.hidden = state.agentOffset >= result.page.total || uniqueItems.length === 0;
   } catch (error) {
     if (controller.signal.aborted) return;
     marketSource.textContent = "Live discovery source unavailable.";
@@ -334,10 +352,13 @@ async function loadAgents() {
       "Agent discovery could not be completed.",
       error instanceof Error ? error.message : "The live source did not respond.",
     );
+    document.querySelector("#agent-load-more").hidden = true;
   } finally {
     if (!controller.signal.aborted) agentList.setAttribute("aria-busy", "false");
   }
 }
+
+document.querySelector("#agent-load-more").addEventListener("click", () => loadAgents({ append: true }));
 
 document.querySelectorAll("[data-category]").forEach((button) => {
   button.addEventListener("click", () => {

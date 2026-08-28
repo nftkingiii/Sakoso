@@ -726,6 +726,12 @@ main {
   gap: 10px;
 }
 
+.agent-load-more {
+  display: block;
+  min-width: 190px;
+  margin: 28px auto 0;
+}
+
 .agent-card,
 .agent-skeleton {
   min-height: 330px;
