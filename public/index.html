@@ -18,7 +18,7 @@
     <div class="grain" aria-hidden="true"></div>
 
     <header class="site-header">
-      <a class="brand" href="#discover" aria-label="Sakoso home">
+      <a class="brand" href="#home" aria-label="Sakoso home">
         <span class="brand-mark"><img src="/assets/mark.svg" alt="" /></span>
         <span class="brand-name">Sakoso</span>
       </a>
@@ -26,14 +26,25 @@
       <nav class="view-tabs" aria-label="Primary" role="tablist">
         <button
           class="view-tab is-active"
-          id="tab-discover"
+          id="tab-home"
           type="button"
           role="tab"
           aria-selected="true"
-          aria-controls="view-discover"
-          data-view="discover"
+          aria-controls="view-home"
+          data-view="home"
         >
-          Discover
+          Home
+        </button>
+        <button
+          class="view-tab"
+          id="tab-agents"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="view-agents"
+          data-view="agents"
+        >
+          Live agents
         </button>
         <button
           class="view-tab"
@@ -68,55 +79,93 @@
     <main id="main-content">
       <section
         class="view-panel"
-        id="view-discover"
+        id="view-home"
         role="tabpanel"
-        aria-labelledby="tab-discover"
-        data-panel="discover"
+        aria-labelledby="tab-home"
+        data-panel="home"
       >
-        <section class="hero-shell">
-          <div class="hero-copy">
-            <h1>Give agents room to work. <em>Not room to wander.</em></h1>
-            <p class="hero-lede">
-              Discover live financial agents on BNB Chain, define exactly what they can call and
-              spend, then verify their authority onchain.
-            </p>
-            <div class="hero-actions">
-              <button class="button button-light" type="button" data-scroll-agents>
-                Explore live agents
-                <span aria-hidden="true">↘</span>
-              </button>
-              <button class="button button-quiet" type="button" data-go-view="control">
-                Define authority
-              </button>
-            </div>
-            <dl class="hero-facts">
-              <div>
-                <dt>Discovery</dt>
-                <dd>ERC-8004 · BSC</dd>
-              </div>
-              <div>
-                <dt>Authority</dt>
-                <dd>Altana · Testnet</dd>
-              </div>
-              <div>
-                <dt>Signing</dt>
-                <dd>User controlled</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div class="hero-visual" aria-label="A point cloud representing a bounded agent authority field">
+        <section class="stage-hero">
+          <div class="stage-field" aria-label="A point cloud representing a bounded agent authority field">
             <canvas id="authority-field" aria-hidden="true"></canvas>
             <div class="field-caption">
               <span>Permission field</span>
               <span class="field-coordinate">97 / KEYSTORE</span>
             </div>
-            <div class="field-legend" aria-hidden="true">
-              <span class="legend-node"></span>
-              <span>Every call stays inside the field.</span>
+            <span class="stage-axis stage-axis-x" aria-hidden="true"></span>
+            <span class="stage-axis stage-axis-y" aria-hidden="true"></span>
+          </div>
+
+          <div class="stage-copy">
+            <h1>Give agents room to work. <em>Never room to wander.</em></h1>
+            <p class="hero-lede">
+              Discover live financial agents on BNB Chain, define exactly what they can call and
+              spend, then verify their authority onchain.
+            </p>
+            <div class="hero-actions">
+              <button class="button button-light" type="button" data-go-view="agents">Explore live agents</button>
+              <button class="button button-quiet" type="button" data-go-view="control">
+                Define authority
+              </button>
             </div>
           </div>
+
+          <div class="stage-signal signal-identity" aria-hidden="true">
+            <span class="signal-node"></span>
+            <p>Live identity</p>
+            <small>ERC-8004 / BSC</small>
+          </div>
+          <div class="stage-signal signal-authority" aria-hidden="true">
+            <span class="signal-node"></span>
+            <p>Bounded authority</p>
+            <small>CALLS / SPEND / TIME</small>
+          </div>
+          <div class="stage-signal signal-proof" aria-hidden="true">
+            <span class="signal-node"></span>
+            <p>Onchain proof</p>
+            <small>ALTANA KEYSTORE</small>
+          </div>
+
+          <dl class="stage-ledger">
+            <div>
+              <dt>Discovery</dt>
+              <dd>Live registry evidence</dd>
+            </div>
+            <div>
+              <dt>Authority</dt>
+              <dd>Selector-level limits</dd>
+            </div>
+            <div>
+              <dt>Signing</dt>
+              <dd>Always user controlled</dd>
+            </div>
+          </dl>
         </section>
+
+        <section class="landing-sequence" aria-labelledby="sequence-heading">
+          <div class="sequence-heading">
+            <h2 id="sequence-heading">From identity to authority, without a leap of faith.</h2>
+            <p>Sakoso turns a marketplace listing into a boundary you can inspect before an agent touches capital.</p>
+          </div>
+          <ol class="sequence-steps">
+            <li><span>01</span><strong>Find live evidence</strong><p>Compare registered BSC identities, capabilities, feedback, and payment support.</p></li>
+            <li><span>02</span><strong>Draw the boundary</strong><p>Allow exact contracts and functions, then cap spend and session lifetime.</p></li>
+            <li><span>03</span><strong>Verify the key</strong><p>Read the session authority directly from Altana’s deployed KeyStore.</p></li>
+          </ol>
+        </section>
+      </section>
+
+      <section
+        class="view-panel agents-view"
+        id="view-agents"
+        role="tabpanel"
+        aria-labelledby="tab-agents"
+        data-panel="agents"
+        hidden
+      >
+        <header class="agents-header">
+          <h1>Live agents, measured by evidence.</h1>
+          <p>Search registered BNB Chain identities and compare what the public registry can actually prove.</p>
+        </header>
 
         <section class="coverage-shell" aria-labelledby="coverage-heading">
           <div class="section-intro compact-intro">

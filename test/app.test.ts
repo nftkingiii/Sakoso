@@ -60,7 +60,11 @@ describe("Sakoso API", () => {
     expect(response.headers["content-security-policy"]).toContain("style-src 'self'");
     expect(response.headers["content-security-policy"]).not.toContain("'unsafe-inline'");
     expect(response.body).toContain("Give agents room to work.");
-    expect(response.body).toContain("Not room to wander.");
+    expect(response.body).toContain("Never room to wander.");
+    expect(response.body).toContain('data-view="agents"');
+    expect(response.body).toContain('data-panel="agents"');
+    expect(response.body).not.toContain("data-scroll-agents");
+    expect(response.body).not.toContain("↘");
     expect(response.body).toContain('/assets/app.js');
     await app.close();
   });

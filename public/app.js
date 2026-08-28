@@ -14,6 +14,7 @@ const state = {
   agentRequest: null,
   latestDigest: null,
 };
+const views = ["home", "agents", "control", "verify"];
 
 function element(tag, className, text) {
   const result = document.createElement(tag);
@@ -119,11 +120,7 @@ document.querySelectorAll("[data-go-view]").forEach((button) => {
 
 window.addEventListener("hashchange", () => {
   const view = location.hash.slice(1);
-  if (["discover", "control", "verify"].includes(view)) activateView(view);
-});
-
-document.querySelector("[data-scroll-agents]").addEventListener("click", () => {
-  document.querySelector("#agent-market").scrollIntoView({ behavior: "smooth", block: "start" });
+  if (views.includes(view)) activateView(view);
 });
 
 async function loadHealth() {
@@ -535,7 +532,7 @@ function createAuthorityField() {
 
 setDefaultExpiry();
 createAuthorityField();
-activateView(["discover", "control", "verify"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "discover");
+activateView(views.includes(location.hash.slice(1)) ? location.hash.slice(1) : "home");
 loadHealth();
 loadCoverage();
 loadAgents();
