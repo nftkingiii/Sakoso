@@ -74,68 +74,63 @@
         data-panel="home"
       >
         <section class="stage-hero">
-          <div class="stage-field" aria-label="A point cloud representing a bounded agent authority field">
+          <div class="stage-field" aria-label="A point-cloud globe representing BSC agent discovery">
             <canvas id="authority-field" aria-hidden="true"></canvas>
+            <img class="network-globe" src="/assets/network-globe.webp" width="960" height="1706" alt="" />
             <div class="field-caption">
-              <span>Permission field</span>
-              <span class="field-coordinate">97 / KEYSTORE</span>
+              <span>// BSC AGENT NETWORK</span>
+              <span class="field-coordinate">MAINNET 56 / KEYSTORE 97</span>
             </div>
-            <span class="stage-axis stage-axis-x" aria-hidden="true"></span>
-            <span class="stage-axis stage-axis-y" aria-hidden="true"></span>
           </div>
 
           <div class="stage-copy">
-            <h1>Give agents room to work. <em>Never room to wander.</em></h1>
+            <span class="stage-number">01</span>
+            <h1>Agents,<br />with boundaries.</h1>
             <p class="hero-lede">
-              Discover live financial agents on BNB Chain, define exactly what they can call and
-              spend, then verify their authority onchain.
+              Find a live BSC agent. Limit its contracts, calls, spend and time. Verify the authority onchain.
             </p>
             <div class="hero-actions">
-              <button class="button button-light" type="button" data-go-view="agents">Explore live agents</button>
+              <button class="button button-light" type="button" data-go-view="agents">Open marketplace</button>
             </div>
           </div>
 
-          <div class="stage-signal signal-identity" aria-hidden="true">
-            <span class="signal-node"></span>
-            <p>Live identity</p>
-            <small>ERC-8004 / BSC</small>
-          </div>
-          <div class="stage-signal signal-authority" aria-hidden="true">
-            <span class="signal-node"></span>
-            <p>Bounded authority</p>
-            <small>CALLS / SPEND / TIME</small>
-          </div>
-          <div class="stage-signal signal-proof" aria-hidden="true">
-            <span class="signal-node"></span>
-            <p>Onchain proof</p>
-            <small>ALTANA KEYSTORE</small>
-          </div>
+          <ol class="stage-progress" aria-hidden="true">
+            <li class="is-current">01</li>
+            <li>02</li>
+            <li>03</li>
+          </ol>
 
           <dl class="stage-ledger">
             <div>
               <dt>Discovery</dt>
-              <dd>Live registry evidence</dd>
+              <dd>ERC-8004 / BSC</dd>
             </div>
             <div>
               <dt>Authority</dt>
-              <dd>Selector-level limits</dd>
+              <dd>Calls / spend / time</dd>
             </div>
             <div>
-              <dt>Signing</dt>
-              <dd>Always user controlled</dd>
+              <dt>Proof</dt>
+              <dd>Altana KeyStore</dd>
             </div>
           </dl>
         </section>
 
+        <div class="system-ticker" aria-hidden="true">
+          <span>BOUND THE AGENT ////// VERIFY THE KEY ////// USER-CONTROLLED SIGNING ////// BNB TESTNET 97 //////</span>
+          <span>BOUND THE AGENT ////// VERIFY THE KEY ////// USER-CONTROLLED SIGNING ////// BNB TESTNET 97 //////</span>
+        </div>
+
         <section class="landing-sequence" aria-labelledby="sequence-heading">
           <div class="sequence-heading">
-            <h2 id="sequence-heading">From identity to authority, without a leap of faith.</h2>
-            <p>Sakoso turns a marketplace listing into a boundary you can inspect before an agent touches capital.</p>
+            <span class="stage-number">02</span>
+            <h2 id="sequence-heading">Control the call.</h2>
+            <p>Move from a public agent identity to a permission you can inspect, sign and revoke.</p>
           </div>
           <ol class="sequence-steps">
-            <li><span>01</span><strong>Find live evidence</strong><p>Compare registered BSC identities, capabilities, feedback, and payment support.</p></li>
-            <li><span>02</span><strong>Draw the boundary</strong><p>Allow exact contracts and functions, then cap spend and session lifetime.</p></li>
-            <li><span>03</span><strong>Verify the key</strong><p>Read the session authority directly from Altana’s deployed KeyStore.</p></li>
+            <li><span>01 / DISCOVER</span><strong>Choose the agent</strong><p>Inspect its registry identity, protocols, feedback and payment claims.</p></li>
+            <li><span>02 / LIMIT</span><strong>Set the boundary</strong><p>Allow exact contracts and functions. Cap spend and expiry.</p></li>
+            <li><span>03 / VERIFY</span><strong>Read the proof</strong><p>Check the session key directly against Altana’s KeyStore.</p></li>
           </ol>
         </section>
       </section>

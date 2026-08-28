@@ -59,8 +59,10 @@ describe("Sakoso API", () => {
     expect(response.headers["cache-control"]).toBe("no-store");
     expect(response.headers["content-security-policy"]).toContain("style-src 'self'");
     expect(response.headers["content-security-policy"]).not.toContain("'unsafe-inline'");
-    expect(response.body).toContain("Give agents room to work.");
-    expect(response.body).toContain("Never room to wander.");
+    expect(response.body).toContain("Agents,");
+    expect(response.body).toContain("with boundaries.");
+    expect(response.body).toContain("Control the call.");
+    expect(response.body).toContain('/assets/network-globe.webp');
     expect(response.body).toContain('<body class="is-landing">');
     expect(response.body).toContain('data-view="agents"');
     expect(response.body).toContain("Agent marketplace");
@@ -84,9 +86,10 @@ describe("Sakoso API", () => {
       authoritySource: authoritySource(),
       revision: "test",
     });
-    const [styles, mark] = await Promise.all([
+    const [styles, mark, globe] = await Promise.all([
       app.inject({ method: "GET", url: "/assets/styles.css" }),
       app.inject({ method: "GET", url: "/assets/mark.svg" }),
+      app.inject({ method: "GET", url: "/assets/network-globe.webp" }),
     ]);
 
     expect(styles.statusCode).toBe(200);
@@ -95,6 +98,9 @@ describe("Sakoso API", () => {
     expect(mark.statusCode).toBe(200);
     expect(mark.headers["content-type"]).toContain("image/svg+xml");
     expect(mark.body).toContain("Sakoso bounded orbit");
+    expect(globe.statusCode).toBe(200);
+    expect(globe.headers["content-type"]).toContain("image/webp");
+    expect(Number(globe.headers["content-length"])).toBeGreaterThan(50_000);
     await app.close();
   });
 
