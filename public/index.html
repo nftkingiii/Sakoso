@@ -73,10 +73,25 @@
         aria-labelledby="tab-home"
         data-panel="home"
       >
-        <section class="stage-hero">
+        <nav class="section-rail" aria-label="Landing sections">
+          <a class="is-active" href="#home-01" data-section-link="01">01</a>
+          <a href="#home-02" data-section-link="02">02</a>
+          <a href="#home-03" data-section-link="03">03</a>
+          <a href="#home-04" data-section-link="04">04</a>
+          <a href="#home-05" data-section-link="05">05</a>
+          <a href="#home-06" data-section-link="06">06</a>
+        </nav>
+
+        <section class="stage-hero" id="home-01" data-scroll-section="01">
           <div class="stage-field" aria-label="A point-cloud globe representing BSC agent discovery">
             <canvas id="authority-field" aria-hidden="true"></canvas>
             <img class="network-globe" src="/assets/network-globe.webp" width="960" height="1706" alt="" />
+            <svg class="globe-orbits" viewBox="0 0 900 760" aria-hidden="true">
+              <ellipse class="draw-line" cx="505" cy="385" rx="305" ry="112" transform="rotate(-9 505 385)"></ellipse>
+              <ellipse class="draw-line draw-line-delayed" cx="505" cy="385" rx="232" ry="305" transform="rotate(18 505 385)"></ellipse>
+              <path class="draw-line draw-line-late" d="M150 385h690"></path>
+              <circle cx="817" cy="336" r="5"></circle>
+            </svg>
             <div class="field-caption">
               <span>// BSC AGENT NETWORK</span>
               <span class="field-coordinate">MAINNET 56 / KEYSTORE 97</span>
@@ -84,21 +99,16 @@
           </div>
 
           <div class="stage-copy">
-            <span class="stage-number">01</span>
-            <h1>Agents,<br />with boundaries.</h1>
-            <p class="hero-lede">
+            <span class="stage-number" data-reveal>01 / BOUNDED AGENT NETWORK</span>
+            <h1 data-reveal>Agents,<br />with boundaries.</h1>
+            <p class="hero-lede" data-reveal>
               Find a live BSC agent. Limit its contracts, calls, spend and time. Verify the authority onchain.
             </p>
-            <div class="hero-actions">
-              <button class="button button-light" type="button" data-go-view="agents">Open marketplace</button>
+            <div class="hero-actions" data-reveal>
+              <button class="button button-light" type="button" data-go-view="agents">.open [MARKETPLACE]</button>
+              <button class="button button-quiet" type="button" data-go-view="verify">.verify [KEYSTORE]</button>
             </div>
           </div>
-
-          <ol class="stage-progress" aria-hidden="true">
-            <li class="is-current">01</li>
-            <li>02</li>
-            <li>03</li>
-          </ol>
 
           <dl class="stage-ledger">
             <div>
@@ -121,17 +131,84 @@
           <span>BOUND THE AGENT ////// VERIFY THE KEY ////// USER-CONTROLLED SIGNING ////// BNB TESTNET 97 //////</span>
         </div>
 
-        <section class="landing-sequence" aria-labelledby="sequence-heading">
-          <div class="sequence-heading">
-            <span class="stage-number">02</span>
+        <section class="landing-sequence technical-section" id="home-02" data-scroll-section="02" aria-labelledby="sequence-heading">
+          <div class="sequence-heading" data-reveal>
+            <span class="stage-number">02 / BOUNDED AUTHORITY</span>
             <h2 id="sequence-heading">Control the call.</h2>
-            <p>Move from a public agent identity to a permission you can inspect, sign and revoke.</p>
+            <p>Move from a public identity to a permission your wallet can inspect, sign and revoke.</p>
+            <ul class="slash-list" aria-label="Authority properties">
+              <li>/ EXACT CONTRACTS</li>
+              <li>/ ALLOWED FUNCTIONS</li>
+              <li>/ SPEND CAPS</li>
+              <li>/ HARD EXPIRY</li>
+            </ul>
           </div>
-          <ol class="sequence-steps">
-            <li><span>01 / DISCOVER</span><strong>Choose the agent</strong><p>Inspect its registry identity, protocols, feedback and payment claims.</p></li>
-            <li><span>02 / LIMIT</span><strong>Set the boundary</strong><p>Allow exact contracts and functions. Cap spend and expiry.</p></li>
-            <li><span>03 / VERIFY</span><strong>Read the proof</strong><p>Check the session key directly against Altana’s KeyStore.</p></li>
-          </ol>
+          <svg class="authority-diagram" viewBox="0 0 760 620" role="img" aria-label="Sakoso authority layers">
+            <g class="draw-group">
+              <path class="draw-line" d="M100 430 380 570 660 430 380 290Z"></path>
+              <path class="draw-line draw-line-delayed" d="M100 330 380 470 660 330 380 190Z"></path>
+              <path class="draw-line draw-line-late" d="M100 230 380 370 660 230 380 90Z"></path>
+              <path class="draw-line" d="M100 230v200M380 90v480M660 230v200"></path>
+            </g>
+            <g class="diagram-copy">
+              <text x="380" y="118">AGENT IDENTITY / ERC-8004</text>
+              <text x="380" y="318">PERMISSION / CALLS + SPEND</text>
+              <text x="380" y="518">PROOF / ALTANA KEYSTORE</text>
+            </g>
+            <rect class="diagram-accent" x="350" y="270" width="60" height="60" transform="rotate(45 380 300)"></rect>
+          </svg>
+        </section>
+
+        <section class="stack-section technical-section" id="home-03" data-scroll-section="03" aria-labelledby="stack-heading">
+          <div class="diamond-number" aria-hidden="true"><span>03</span></div>
+          <header data-reveal>
+            <p>// SAKOSO CONTROL STACK //</p>
+            <h2 id="stack-heading">Authority, end to end.</h2>
+          </header>
+          <div class="stack-grid">
+            <article data-reveal><span>01</span><h3>Agent gallery</h3><p>Live BSC identities from the public ERC-8004 registry.</p></article>
+            <article data-reveal><span>02</span><h3>Evidence</h3><p>Owner, registry, feedback, protocols and payment claims.</p></article>
+            <article data-reveal><span>03</span><h3>Call allowlist</h3><p>Only named contracts and function signatures enter the draft.</p></article>
+            <article data-reveal><span>04</span><h3>Spend boundary</h3><p>Cap the atomic amount and define the reset period.</p></article>
+            <article data-reveal><span>05</span><h3>User signing</h3><p>Sakoso prepares the digest. Your wallet keeps the key.</p></article>
+            <article data-reveal><span>06</span><h3>KeyStore proof</h3><p>Read active authority directly from Altana at a pinned block.</p></article>
+          </div>
+          <svg class="stack-bolt" viewBox="0 0 120 260" aria-hidden="true">
+            <path class="draw-line" d="M72 8 24 142h47L48 252l52-145H54Z"></path>
+          </svg>
+        </section>
+
+        <section class="services-section technical-section" id="home-04" data-scroll-section="04" aria-labelledby="services-heading">
+          <header data-reveal>
+            <div><span class="stage-number">04 / PRODUCT SURFACES</span><h2 id="services-heading">Use the proof.<br />Not the promise.</h2></div>
+            <p>Three connected surfaces turn an indexed identity into bounded, readable authority.</p>
+          </header>
+          <div class="service-tabs" role="tablist" aria-label="Sakoso product surfaces">
+            <button class="is-active" type="button" role="tab" aria-selected="true" data-service-filter="all">ALL</button>
+            <button type="button" role="tab" aria-selected="false" data-service-filter="market">MARKET</button>
+            <button type="button" role="tab" aria-selected="false" data-service-filter="authority">AUTHORITY</button>
+          </div>
+          <div class="service-grid">
+            <article data-service-card="market" data-reveal><span>// 8004SCAN</span><h3>Agent discovery</h3><p>Search unique BSC mainnet identities and inspect the record behind each card.</p><button type="button" data-go-view="agents" aria-label="Open agent marketplace">↗</button></article>
+            <article data-service-card="authority" data-reveal><span>// ALTANA</span><h3>Permission drafts</h3><p>Bind the selected agent to exact calls, spend and expiry before signing.</p><button type="button" data-go-view="agents" aria-label="Choose an agent and set limits">↗</button></article>
+            <article data-service-card="authority" data-reveal><span>// KEYSTORE</span><h3>Authority readback</h3><p>Check whether a session key is currently authorized for the wallet.</p><button type="button" data-go-view="verify" aria-label="Open KeyStore verification">↗</button></article>
+          </div>
+        </section>
+
+        <section class="mission-section technical-section" id="home-05" data-scroll-section="05" aria-labelledby="mission-heading">
+          <span class="stage-number" data-reveal>05 / OUR MISSION //</span>
+          <h2 id="mission-heading" data-reveal>Agents can move fast.<br />Authority should move carefully.</h2>
+          <div class="mission-rule" aria-hidden="true">////////////////////////////////////////////////////////////////////</div>
+          <p data-reveal>Sakoso makes an agent’s identity, permissions and proof readable in one path. Discovery stays public. Limits stay explicit. Signing stays with the user.</p>
+        </section>
+
+        <section class="contribute-section technical-section" id="home-06" data-scroll-section="06" aria-labelledby="contribute-heading">
+          <span class="stage-number" data-reveal>06 / START WITH EVIDENCE</span>
+          <h2 id="contribute-heading" data-reveal>Put an agent to work?</h2>
+          <div class="contribute-grid">
+            <article data-reveal><span>// DISCOVER</span><h3>Agent marketplace</h3><p>Compare registered identities, then expand a card to inspect the complete record.</p><button class="button button-light" type="button" data-go-view="agents">.open [MARKETPLACE]</button></article>
+            <article data-reveal><span>// VERIFY</span><h3>Onchain authority</h3><p>Read a session key against Altana’s KeyStore without handing Sakoso a signer.</p><button class="button button-quiet" type="button" data-go-view="verify">.read [KEYSTORE]</button></article>
+          </div>
         </section>
       </section>
 
@@ -143,11 +220,6 @@
         data-panel="agents"
         hidden
       >
-        <header class="agents-header">
-          <h1>Choose an agent to work with.</h1>
-          <p>Browse registered BSC mainnet identities, then inspect the evidence before setting limits.</p>
-        </header>
-
         <section class="market-shell" id="agent-market" aria-labelledby="market-heading">
           <div class="section-intro market-intro">
             <div>
@@ -452,6 +524,7 @@
           <section>
             <p class="detail-section-label">Registry record</p>
             <dl class="detail-registry" id="agent-detail-registry"></dl>
+            <p class="copy-status" id="copy-status" aria-live="polite"></p>
           </section>
           <section>
             <p class="detail-section-label">Declared protocols</p>

@@ -156,9 +156,21 @@ function selectAgent(agent) {
   activateView("control");
 }
 
-function registryRow(label, value) {
+function registryRow(label, value, { copyable = false } = {}) {
   const row = element("div");
-  row.append(element("dt", "", label), element("dd", "", value));
+  const definition = element("dd");
+  if (copyable) {
+    definition.className = "registry-copy-value";
+    definition.append(element("code", "", value));
+    const copyButton = element("button", "copy-registry-value", "[COPY]");
+    copyButton.type = "button";
+    copyButton.dataset.copyValue = value;
+    copyButton.setAttribute("aria-label", `Copy ${label}`);
+    definition.append(copyButton);
+  } else {
+    definition.textContent = value;
+  }
+  row.append(element("dt", "", label), definition);
   return row;
 }
 
@@ -181,9 +193,9 @@ function openAgentDetail(agent, index, trigger) {
     metric("Stars", formatMetric(agent.evidence.stars)),
   );
   document.querySelector("#agent-detail-registry").replaceChildren(
-    registryRow("Agent ID", truncate(agent.id, 15, 10)),
-    registryRow("Owner", truncate(agent.owner, 10, 8)),
-    registryRow("Registry", truncate(agent.registry, 10, 8)),
+    registryRow("Agent ID", agent.id || "Unavailable", { copyable: Boolean(agent.id) }),
+    registryRow("Owner", agent.owner || "Unavailable", { copyable: Boolean(agent.owner) }),
+    registryRow("Registry", agent.registry || "Unavailable", { copyable: Boolean(agent.registry) }),
     registryRow("Chain", agent.evidence.bscMainnet ? "BNB Smart Chain · 56" : String(agent.chainId ?? "Unknown")),
     registryRow("Updated", agent.evidence.observedUpdatedAt ? new Date(agent.evidence.observedUpdatedAt).toLocaleString() : "Unavailable"),
     registryRow("Payments", agent.payments.x402 ? "x402 declared" : "No x402 claim"),
@@ -191,7 +203,9 @@ function openAgentDetail(agent, index, trigger) {
   const protocols = renderProtocols(agent.protocols, agent.payments.x402);
   document.querySelector("#agent-detail-protocols").replaceChildren(...protocols.childNodes);
 
+  agentDetail.classList.remove("is-opening");
   agentDetail.showModal();
+  window.requestAnimationFrame(() => agentDetail.classList.add("is-opening"));
 }
 
 document.querySelector("#agent-detail-close").addEventListener("click", () => agentDetail.close());
@@ -199,8 +213,25 @@ agentDetail.addEventListener("click", (event) => {
   if (event.target === agentDetail) agentDetail.close();
 });
 agentDetail.addEventListener("close", () => {
+  agentDetail.classList.remove("is-opening");
   state.detailTrigger?.focus();
   state.detailTrigger = null;
+});
+document.querySelector("#agent-detail-registry").addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-copy-value]");
+  if (!button) return;
+  const copyStatus = document.querySelector("#copy-status");
+  try {
+    await navigator.clipboard.writeText(button.dataset.copyValue);
+    button.textContent = "[COPIED]";
+    copyStatus.textContent = `${button.getAttribute("aria-label").replace("Copy ", "")} copied.`;
+  } catch {
+    copyStatus.textContent = "Copy is unavailable in this browser.";
+  }
+  window.setTimeout(() => {
+    button.textContent = "[COPY]";
+    copyStatus.textContent = "";
+  }, 1_600);
 });
 document.querySelector("#agent-detail-limits").addEventListener("click", () => {
   if (!state.inspectedAgent) return;
@@ -217,6 +248,7 @@ document.querySelector("#clear-selected-agent").addEventListener("click", () => 
 
 function agentCard(agent, index) {
   const card = element("article", "agent-card");
+  card.style.setProperty("--card-delay", `${Math.min(index, 8) * 45}ms`);
   card.tabIndex = 0;
   card.setAttribute("role", "button");
   card.setAttribute("aria-haspopup", "dialog");
@@ -295,6 +327,9 @@ async function loadAgents({ append = false } = {}) {
       return;
     }
     agentList.replaceChildren(...state.agentCards.map(agentCard));
+    window.requestAnimationFrame(() => {
+      agentList.querySelectorAll(".agent-card").forEach((card) => card.classList.add("is-visible"));
+    });
     const loadMore = document.querySelector("#agent-load-more");
     state.agentOffset += uniqueItems.length;
     loadMore.hidden = state.agentOffset >= result.page.total || uniqueItems.length === 0;
@@ -337,6 +372,69 @@ document.querySelector("#agent-sort").addEventListener("change", (event) => {
   state.sort = event.target.value;
   loadAgents();
 });
+
+document.querySelectorAll("[data-service-filter]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const filter = button.dataset.serviceFilter;
+    const grid = document.querySelector(".service-grid");
+    document.querySelectorAll("[data-service-filter]").forEach((item) => {
+      const active = item === button;
+      item.classList.toggle("is-active", active);
+      item.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    grid.classList.add("is-switching");
+    window.setTimeout(() => {
+      document.querySelectorAll("[data-service-card]").forEach((card) => {
+        const visible = filter === "all" || card.dataset.serviceCard === filter;
+        card.classList.toggle("is-filtered-out", !visible);
+      });
+      window.requestAnimationFrame(() => grid.classList.remove("is-switching"));
+    }, 150);
+  });
+});
+
+function setupLandingMotion() {
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const revealTargets = [...document.querySelectorAll("[data-reveal]")];
+  const sections = [...document.querySelectorAll("[data-scroll-section]")];
+
+  if (reducedMotion || !("IntersectionObserver" in window)) {
+    revealTargets.forEach((target) => target.classList.add("is-visible"));
+    sections.forEach((section) => section.classList.add("is-visible"));
+    return;
+  }
+
+  const revealObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.16, rootMargin: "0px 0px -8%" },
+  );
+  revealTargets.forEach((target) => revealObserver.observe(target));
+  sections.forEach((section) => revealObserver.observe(section));
+
+  const sectionObserver = new IntersectionObserver(
+    (entries) => {
+      const active = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
+      if (!active) return;
+      const section = active.target.dataset.scrollSection;
+      document.querySelectorAll("[data-section-link]").forEach((link) => {
+        const selected = link.dataset.sectionLink === section;
+        link.classList.toggle("is-active", selected);
+        if (selected) link.setAttribute("aria-current", "true");
+        else link.removeAttribute("aria-current");
+      });
+    },
+    { threshold: [0.2, 0.45, 0.7], rootMargin: "-35% 0px -45%" },
+  );
+  sections.forEach((section) => sectionObserver.observe(section));
+}
 
 function setDefaultExpiry() {
   const input = document.querySelector("#session-expiry");
@@ -577,6 +675,7 @@ function createAuthorityField() {
 
 setDefaultExpiry();
 createAuthorityField();
+setupLandingMotion();
 activateView(views.includes(location.hash.slice(1)) ? location.hash.slice(1) : "home");
 loadHealth();
 loadAgents();

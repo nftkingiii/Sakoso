@@ -66,7 +66,10 @@ describe("Sakoso API", () => {
     expect(response.body).toContain('<body class="is-landing">');
     expect(response.body).toContain('data-view="agents"');
     expect(response.body).toContain("Agent marketplace");
-    expect(response.body).toContain("Choose an agent to work with.");
+    expect(response.body).toContain("Find the right agent");
+    expect(response.body).not.toContain("Choose an agent to work with.");
+    expect(response.body).toContain('class="section-rail"');
+    expect(response.body).toContain("Authority, end to end.");
     expect(response.body).not.toContain("Live market coverage");
     expect(response.body).toContain('data-panel="agents"');
     expect(response.body).not.toContain('data-view="control"');
@@ -86,10 +89,11 @@ describe("Sakoso API", () => {
       authoritySource: authoritySource(),
       revision: "test",
     });
-    const [styles, mark, globe] = await Promise.all([
+    const [styles, mark, globe, script] = await Promise.all([
       app.inject({ method: "GET", url: "/assets/styles.css" }),
       app.inject({ method: "GET", url: "/assets/mark.svg" }),
       app.inject({ method: "GET", url: "/assets/network-globe.webp" }),
+      app.inject({ method: "GET", url: "/assets/app.js" }),
     ]);
 
     expect(styles.statusCode).toBe(200);
@@ -101,6 +105,9 @@ describe("Sakoso API", () => {
     expect(globe.statusCode).toBe(200);
     expect(globe.headers["content-type"]).toContain("image/webp");
     expect(Number(globe.headers["content-length"])).toBeGreaterThan(50_000);
+    expect(script.statusCode).toBe(200);
+    expect(script.body).toContain("IntersectionObserver");
+    expect(script.body).toContain("copy-registry-value");
     await app.close();
   });
 
