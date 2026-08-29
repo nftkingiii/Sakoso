@@ -82,6 +82,8 @@ describe("Sakoso API", () => {
     expect(response.body).not.toContain('id="agent-load-more"');
     expect(response.body).toContain('class="advanced-settings"');
     expect(response.body).toContain("Prepare wallet approval");
+    expect(response.body).toContain('id="connect-wallet"');
+    expect(response.body).toContain('id="wallet-status"');
     expect(response.body).not.toContain("data-scroll-agents");
     expect(response.body).not.toContain("↘");
     expect(response.body).toContain('/assets/app.js');

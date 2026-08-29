@@ -299,6 +299,7 @@
 
             <label class="field field-wide" for="session-wallet">
               <span>Smart-wallet address</span>
+              <button class="inline-action" id="connect-wallet" type="button">Connect wallet</button>
               <input
                 id="session-wallet"
                 name="walletAddress"
@@ -313,6 +314,7 @@
               />
               <small>The EIP-7702 wallet that will grant this session.</small>
             </label>
+            <p class="wallet-status" id="wallet-status" aria-live="polite"></p>
 
             <div class="field-pair">
               <label class="field" for="session-target">

@@ -66,6 +66,8 @@ interface Scan8004Options {
   timeoutMs: number;
   cacheTtlMs: number;
   fetchImplementation?: typeof fetch;
+  retryCount?: number;
+  retryDelayMs?: number;
 }
 
 interface CacheEntry {
@@ -103,11 +105,27 @@ export class Scan8004AgentSource implements AgentSource {
     const headers = new Headers({ accept: "application/json" });
     if (this.options.apiKey) headers.set("X-API-Key", this.options.apiKey);
 
-    const response = await this.fetchImplementation(url, {
-      headers,
-      redirect: "error",
-      signal: AbortSignal.timeout(this.options.timeoutMs),
-    });
+    const retryCount = Math.max(0, Math.min(this.options.retryCount ?? 1, 2));
+    const retryDelayMs = Math.max(0, Math.min(this.options.retryDelayMs ?? 150, 2_000));
+    let response: Response | undefined;
+    let lastError: unknown;
+    for (let attempt = 0; attempt <= retryCount; attempt += 1) {
+      try {
+        response = await this.fetchImplementation(url, {
+          headers,
+          redirect: "error",
+          signal: AbortSignal.timeout(this.options.timeoutMs),
+        });
+        if (response.ok || ![408, 425, 429, 500, 502, 503, 504].includes(response.status)) break;
+        lastError = new Error(`8004scan returned ${response.status}`);
+      } catch (error) {
+        lastError = error;
+      }
+      if (attempt < retryCount && retryDelayMs) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs * (attempt + 1)));
+      }
+    }
+    if (!response) throw (lastError instanceof Error ? lastError : new Error("8004scan request failed"));
     if (!response.ok) throw new Error(`8004scan returned ${response.status}`);
 
     const parsed = AgentListSchema.parse(await response.json());

@@ -2733,6 +2733,39 @@ main {
   }
 }
 
+.field-wide > span:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inline-action {
+  padding: 2px 0;
+  border-bottom: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.inline-action:hover:not(:disabled),
+.inline-action:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.wallet-status {
+  min-height: 16px;
+  margin: -8px 0 12px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+}
+
 .advanced-settings {
   margin: 2px 0 24px;
   border: 1px solid var(--line);

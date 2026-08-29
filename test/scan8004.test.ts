@@ -30,4 +30,24 @@ describe("8004scan integration", () => {
     expect(calledUrl.searchParams.get("is_active")).toBeNull();
     expect(calledUrl.searchParams.get("search")).toBe("yield optimisation");
   });
+
+  it("retries a transient upstream failure once, then preserves the source error", async () => {
+    const fetchImplementation = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("busy", { status: 503 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ items: [], total: 0, limit: 10, offset: 0 }), { status: 200 }),
+      );
+    const source = new Scan8004AgentSource({
+      timeoutMs: 1_000,
+      cacheTtlMs: 10_000,
+      retryDelayMs: 0,
+      fetchImplementation,
+    });
+
+    await expect(
+      source.listAgents({ limit: 10, offset: 0, sortBy: "quality" }),
+    ).resolves.toMatchObject({ total: 0, items: [] });
+    expect(fetchImplementation).toHaveBeenCalledTimes(2);
+  });
 });

@@ -7,6 +7,8 @@ const verifyForm = document.querySelector("#verify-form");
 const agentDetail = document.querySelector("#agent-detail");
 const agentScrollSentinel = document.querySelector("#agent-scroll-sentinel");
 const agentScrollStatus = document.querySelector("#agent-scroll-status");
+const connectWalletButton = document.querySelector("#connect-wallet");
+const walletStatus = document.querySelector("#wallet-status");
 
 const state = {
   category: "",
@@ -589,6 +591,32 @@ sessionForm.addEventListener("submit", async (event) => {
     errorBox.hidden = false;
   } finally {
     setButtonPending(submit, false, "Preparing…", "Prepare wallet approval");
+  }
+});
+
+connectWalletButton?.addEventListener("click", async () => {
+  walletStatus.textContent = "";
+  const provider = window.ethereum;
+  if (!provider?.request) {
+    walletStatus.textContent = "Install or unlock an EVM wallet to connect.";
+    return;
+  }
+  connectWalletButton.disabled = true;
+  try {
+    const accounts = await provider.request({ method: "eth_requestAccounts" });
+    const wallet = accounts?.[0];
+    if (!/^0x[a-fA-F0-9]{40}$/.test(wallet ?? "")) throw new Error("No wallet address was returned.");
+    const chainId = await provider.request({ method: "eth_chainId" });
+    document.querySelector("#session-wallet").value = wallet;
+    if (String(chainId).toLowerCase() !== "0x61") {
+      walletStatus.textContent = "Connected. Switch to BNB Testnet (chain 97) before signing.";
+    } else {
+      walletStatus.textContent = "Connected on BNB Testnet. Sakoso never receives your private key.";
+    }
+  } catch (error) {
+    walletStatus.textContent = error instanceof Error ? error.message : "Wallet connection was cancelled.";
+  } finally {
+    connectWalletButton.disabled = false;
   }
 });
 
