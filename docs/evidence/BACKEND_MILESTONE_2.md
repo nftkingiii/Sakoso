@@ -4,7 +4,7 @@ Observed: 2026-08-27 UTC
 
 ## Verified release
 
-- Public API: `https://api-production-b9a7.up.railway.app`
+- Public API: `https://sakoso.up.railway.app`
 - Railway deployment: `91f1ffe0-f789-457f-8335-df68c0357278`
 - Served Git revision: `f6d4f3735126efb577b7892d8035263f1a7a4e22`
 - Deployment status: `SUCCESS`

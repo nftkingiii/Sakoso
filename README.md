@@ -42,10 +42,10 @@ Example discovery:
 curl "http://localhost:8080/v1/agents?category=health-factor-monitoring&endpointVerified=true"
 ```
 
-Production product and API: `https://api-production-b9a7.up.railway.app`
+Production product and API: `https://sakoso.up.railway.app`
 
 ```bash
-curl "https://api-production-b9a7.up.railway.app/healthz"
+curl "https://sakoso.up.railway.app/healthz"
 ```
 
 ## Local development

@@ -37,7 +37,7 @@ Those three onchain steps are the next proof gate. A passing negative read is no
 - Code revision: `88a6aa6a3761d6023ce54490529339e617edc9e4`
 - Railway deployment: `f1789c5a-fdfb-456a-be78-d68e1d9ed66d`
 - Deployment status: `SUCCESS`
-- Public API: `https://api-production-b9a7.up.railway.app`
+- Public API: `https://sakoso.up.railway.app`
 
 The live `/healthz` response matched the full intended code revision. A clean public smoke then returned:
 
