@@ -16,7 +16,7 @@ This repository contains a proof-first vertical slice:
 - normalized identity, protocol, payment, score, feedback, and freshness evidence;
 - deterministic bounded-mandate drafts with explicit spend, expiry, slippage, contract, and function limits;
 - deterministic Altana session drafts with selector-level call permissions, a mandatory spend cap, bounded expiry, and mandatory KeyStore registration;
-- block-pinned reads of live BNB testnet authority state from Altana's KeyStore;
+- block-pinned reads of live BNB mainnet authority state from Altana's KeyStore;
 - a local grant, execute, verify, revoke, verify runner that never sends either signer key to the API or writes generated session material to disk;
 - security headers, rate limits, request-size limits, upstream timeouts, schema validation, and secret redaction.
 
@@ -32,7 +32,7 @@ The interface does not simulate wallet state. Its two prepare flows create unsig
 | `GET /v1/coverage` | Live coverage and leading candidate for every required category |
 | `GET /v1/agents` | Live BSC agent discovery and comparison evidence |
 | `POST /v1/mandates/prepare` | Validate and hash a bounded mandate for later wallet confirmation |
-| `GET /v1/altana/config` | Pinned BNB testnet, KeyStore, and explorer configuration |
+| `GET /v1/altana/config` | Pinned BNB mainnet, KeyStore, and explorer configuration |
 | `POST /v1/altana/sessions/prepare` | Validate and hash selector-scoped Altana permissions |
 | `GET /v1/altana/authority` | Read a public session key's live KeyStore state at a specific block |
 
@@ -64,14 +64,14 @@ An 8004scan API key is optional for development and should only be placed in `.e
 The proof runner keeps the admin signer in a local environment variable and keeps the generated session signer in memory only. Start by deriving the EIP-7702 wallet address without sending a transaction:
 
 ```powershell
-$env:ALTANA_ADMIN_PRIVATE_KEY = Read-Host -MaskInput "Altana testnet admin private key"
+$env:ALTANA_ADMIN_PRIVATE_KEY = Read-Host -MaskInput "Altana mainnet admin private key"
 $env:ALTANA_PROOF_MODE = "address"
 pnpm altana:proof
 Remove-Item Env:ALTANA_ADMIN_PRIVATE_KEY
 Remove-Item Env:ALTANA_PROOF_MODE
 ```
 
-Fund only the printed smart-wallet address with testnet BNB. A funded proof run additionally requires an explicit target, function signature, matching calldata, spend cap, and call value. It grants a registered session, verifies it directly against the KeyStore, executes the permitted call, revokes the key in `finally`, and verifies that the key is no longer valid. Do not use a mainnet key.
+Fund only the printed smart-wallet address with BNB. A funded proof run additionally requires an explicit target, function signature, matching calldata, spend cap, and call value. It grants a registered session, verifies it directly against the KeyStore, executes the permitted call, revokes the key in `finally`, and verifies that the key is no longer valid. Mainnet execution is irreversible; use a dedicated wallet and review every call before signing.
 
 ## Verification
 

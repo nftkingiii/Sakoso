@@ -1,4 +1,4 @@
-import { BNB_TESTNET } from "@altananetwork/sdk";
+import { BNB } from "@altananetwork/sdk";
 import {
   createPublicClient,
   getAddress,
@@ -9,7 +9,7 @@ import {
   type Hex,
 } from "viem";
 
-export const ALTANA_TESTNET_EXPLORER = "https://testnet.altana.network";
+export const ALTANA_EXPLORER = "https://explorer.altana.network";
 
 const KEYSTORE_ABI = parseAbi([
   "function isValidKey(address user, bytes32 keyId) view returns (bool)",
@@ -33,16 +33,16 @@ export interface AltanaAuthoritySource {
 
 export function altanaAuthorityLinks(walletAddress: Address, keyId: Hex) {
   return {
-    account: `${ALTANA_TESTNET_EXPLORER}/account/${walletAddress}`,
-    key: `${ALTANA_TESTNET_EXPLORER}/key/${keyId}`,
-    keyStore: `${BNB_TESTNET.explorer}/address/${BNB_TESTNET.keyStore}`,
+    account: `${ALTANA_EXPLORER}/account/${walletAddress}`,
+    key: `${ALTANA_EXPLORER}/key/${keyId}`,
+    keyStore: `${BNB.explorer}/address/${BNB.keyStore}`,
   };
 }
 
 export class OnchainAltanaAuthoritySource implements AltanaAuthoritySource {
   private readonly client = createPublicClient({
-    chain: BNB_TESTNET.chain,
-    transport: http(BNB_TESTNET.publicRpcUrl, { retryCount: 1, timeout: 5_000 }),
+    chain: BNB.chain,
+    transport: http(BNB.publicRpcUrl, { retryCount: 1, timeout: 5_000 }),
   });
 
   async readAuthority(request: AltanaAuthorityRequest): Promise<AltanaAuthorityObservation> {
@@ -50,7 +50,7 @@ export class OnchainAltanaAuthoritySource implements AltanaAuthoritySource {
     const keyId = keccak256(request.publicKey);
     const blockNumber = await this.client.getBlockNumber();
     const authorized = await this.client.readContract({
-      address: BNB_TESTNET.keyStore,
+      address: BNB.keyStore,
       abi: KEYSTORE_ABI,
       functionName: "isValidKey",
       args: [walletAddress, keyId],
@@ -64,17 +64,17 @@ export class OnchainAltanaAuthoritySource implements AltanaAuthoritySource {
 export function altanaPublicConfig() {
   return {
     network: {
-      name: "BNB Smart Chain Testnet",
-      chainId: BNB_TESTNET.chainId,
-      rpcHost: new URL(BNB_TESTNET.publicRpcUrl).host,
+      name: "BNB Smart Chain Mainnet",
+      chainId: BNB.chainId,
+      rpcHost: new URL(BNB.publicRpcUrl).host,
     },
     contracts: {
-      keyStore: BNB_TESTNET.keyStore,
-      keyStoreController: BNB_TESTNET.keyStoreController,
+      keyStore: BNB.keyStore,
+      keyStoreController: BNB.keyStoreController,
     },
     explorer: {
-      altana: ALTANA_TESTNET_EXPLORER,
-      chain: BNB_TESTNET.explorer,
+      altana: ALTANA_EXPLORER,
+      chain: BNB.explorer,
     },
   };
 }

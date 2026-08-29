@@ -157,7 +157,7 @@ export async function buildApp(options: BuildAppOptions) {
           observedBlock: observation.blockNumber.toString(),
           source: {
             kind: "onchain",
-            chainId: 97,
+            chainId: 56,
             contract: altanaPublicConfig().contracts.keyStore,
           },
           explorer: altanaAuthorityLinks(observation.walletAddress, observation.keyId),

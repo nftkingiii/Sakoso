@@ -58,7 +58,7 @@ export function prepareAltanaSession(input: PrepareAltanaSessionInput, now: Date
 
   const payload = {
     version: "sakoso-altana-session/1" as const,
-    chainId: 97 as const,
+    chainId: 56 as const,
     walletAddress: input.walletAddress,
     permissions: {
       calls: input.allowedCalls.map(({ target, signature }) => ({ to: target, signature })),

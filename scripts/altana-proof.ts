@@ -1,5 +1,5 @@
 import {
-  BNB_TESTNET,
+  BNB,
   createClient,
   signerFromPrivateKey,
   type GrantSessionResult,
@@ -13,7 +13,7 @@ import {
 import { z } from "zod";
 import { validateAltanaProofCall } from "../src/domain/altana-proof.js";
 import {
-  ALTANA_TESTNET_EXPLORER,
+  ALTANA_EXPLORER,
   OnchainAltanaAuthoritySource,
   altanaAuthorityLinks,
 } from "../src/integrations/altana.js";
@@ -35,12 +35,12 @@ function requireProofValue(value: string | undefined, name: string): string {
 }
 
 function transactionUrl(transactionHash: Hex | undefined) {
-  return transactionHash ? `${BNB_TESTNET.explorer}/tx/${transactionHash}` : null;
+  return transactionHash ? `${BNB.explorer}/tx/${transactionHash}` : null;
 }
 
 const environment = ProofEnvironmentSchema.parse(process.env);
 const adminSigner = signerFromPrivateKey(environment.ALTANA_ADMIN_PRIVATE_KEY as Hex);
-const client = createClient({ chains: [BNB_TESTNET] });
+const client = createClient({ chains: [BNB] });
 const wallet = await client.createWallet({ signer: adminSigner });
 
 if (environment.ALTANA_PROOF_MODE === "address") {
@@ -48,10 +48,9 @@ if (environment.ALTANA_PROOF_MODE === "address") {
     JSON.stringify(
       {
         walletAddress: wallet.address,
-        chainId: BNB_TESTNET.chainId,
-        faucet: "https://testnet.bnbchain.org/faucet-smart",
-        chainExplorer: `${BNB_TESTNET.explorer}/address/${wallet.address}`,
-        altanaExplorer: `${ALTANA_TESTNET_EXPLORER}/account/${wallet.address}`,
+        chainId: BNB.chainId,
+        chainExplorer: `${BNB.explorer}/address/${wallet.address}`,
+        altanaExplorer: `${ALTANA_EXPLORER}/account/${wallet.address}`,
         note: "No transaction was submitted and no secret was printed.",
       },
       null,
@@ -147,7 +146,7 @@ console.log(
   JSON.stringify(
     {
       walletAddress: wallet.address,
-      chainId: BNB_TESTNET.chainId,
+      chainId: BNB.chainId,
       scope: {
         target,
         signature,

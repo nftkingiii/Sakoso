@@ -74,7 +74,7 @@ describe("Sakoso API", () => {
     expect(response.body).toContain('data-panel="agents"');
     expect(response.body).not.toContain('data-view="control"');
     expect(response.body).toContain('data-panel="control"');
-    expect(response.body).toContain("BNB Testnet · 97");
+    expect(response.body).toContain("BNB Mainnet · 56");
     expect(response.body).toContain('id="agent-detail"');
     expect(response.body).toContain('id="agent-detail-limits"');
     expect(response.body).toContain('id="agent-scroll-sentinel"');
@@ -299,7 +299,7 @@ describe("Sakoso API", () => {
       requiresWalletConfirmation: true,
       onchain: false,
       payload: {
-        chainId: 97,
+        chainId: 56,
         registerInKeyStore: true,
         permissions: {
           calls: [{ to: expect.any(String), signature: "deposit()" }],
@@ -354,10 +354,10 @@ describe("Sakoso API", () => {
       status: "active",
       observedAt: observedAt.toISOString(),
       observedBlock: "72000001",
-      source: { kind: "onchain", chainId: 97 },
+      source: { kind: "onchain", chainId: 56 },
       explorer: {
-        account: expect.stringContaining("testnet.altana.network/account/"),
-        key: expect.stringContaining("testnet.altana.network/key/"),
+        account: expect.stringContaining("explorer.altana.network/account/"),
+        key: expect.stringContaining("explorer.altana.network/key/"),
       },
     });
     expect(authority.readAuthority).toHaveBeenCalledWith({

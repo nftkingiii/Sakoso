@@ -584,7 +584,7 @@ sessionForm.addEventListener("submit", async (event) => {
     document.querySelector("#session-empty").hidden = true;
     document.querySelector("#session-result").hidden = false;
     document.querySelector("#result-digest").textContent = result.digest;
-    document.querySelector("#result-chain").textContent = `BNB Testnet · ${result.payload.chainId}`;
+    document.querySelector("#result-chain").textContent = `BNB Mainnet · ${result.payload.chainId}`;
     document.querySelector("#result-expiry").textContent = new Date(result.payload.expiry * 1_000).toLocaleString();
   } catch (error) {
     errorBox.textContent = error instanceof Error ? error.message : "The session draft could not be prepared.";
@@ -609,9 +609,9 @@ connectWalletButton?.addEventListener("click", async () => {
     const chainId = await provider.request({ method: "eth_chainId" });
     document.querySelector("#session-wallet").value = wallet;
     if (String(chainId).toLowerCase() !== "0x61") {
-      walletStatus.textContent = "Connected. Switch to BNB Testnet (chain 97) before signing.";
+      walletStatus.textContent = "Connected. Switch to BNB Mainnet (chain 56) before signing.";
     } else {
-      walletStatus.textContent = "Connected on BNB Testnet. Sakoso never receives your private key.";
+      walletStatus.textContent = "Connected on BNB Mainnet. Sakoso never receives your private key.";
     }
   } catch (error) {
     walletStatus.textContent = error instanceof Error ? error.message : "Wallet connection was cancelled.";
@@ -637,7 +637,7 @@ function allowedExplorerUrl(value) {
   try {
     const url = new URL(value);
     if (url.protocol !== "https:") return null;
-    if (!["testnet.altana.network", "testnet.bscscan.com"].includes(url.hostname)) return null;
+    if (!["explorer.altana.network", "bscscan.com"].includes(url.hostname)) return null;
     return url.toString();
   } catch {
     return null;
